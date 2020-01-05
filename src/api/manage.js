@@ -8,7 +8,7 @@ const api = {
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
   deployhistory: '/deployhistory',
-  cardHistory: '/cardHistory'
+  cardhistory: '/cardhistory'
 }
 
 export default api
@@ -31,7 +31,7 @@ export function getDeployHistory(parameter) {
 
 export function getCardHistory(parameter) {
   return axios({
-    url: api.cardHistory,
+    url: api.cardhistory,
     method: 'get',
     params: parameter
   })

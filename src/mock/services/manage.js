@@ -74,7 +74,7 @@ const deployHistory = options => {
   })
 }
 
-const CardHistory = options => {
+const cardHistory = options => {
   const parameters = getQueryParameters(options)
 
   const result = []
@@ -337,4 +337,4 @@ Mock.mock(/\/list\/search\/projects/, 'get', projects)
 Mock.mock(/\/workplace\/activity/, 'get', activity)
 Mock.mock(/\/workplace\/teams/, 'get', teams)
 Mock.mock(/\/workplace\/radar/, 'get', radar)
-Mock.mock(/\/workplace\/radar/, 'get', CardHistory)
+Mock.mock(/\/cardhistory/, 'get', cardHistory)

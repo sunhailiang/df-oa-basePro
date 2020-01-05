@@ -56,16 +56,9 @@
     </a-row>
 
     <a-card :loading="loading" :bordered="false" :body-style="{ padding: '0' }">
-      <div class="salesCard">
+      <div class="salesCard" style="min-height: 400px;">
         <a-tabs default-active-key="1" size="large" :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }">
           <div class="extra-wrapper" slot="tabBarExtraContent"></div>
-          <a-tab-pane loading="true" tab="快速配餐" key="1">
-            <a-row>
-              <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div style="height:400px; background:skyblue">配餐</div>
-              </a-col>
-            </a-row>
-          </a-tab-pane>
           <a-tab-pane tab="配餐历史" key="2">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
@@ -74,18 +67,10 @@
                     ref="table"
                     size="default"
                     rowKey="key"
-                    :columns="columns"
+                    :columns="configFoodColumns"
                     :data="loadData"
                     showPagination="auto"
                   >
-                    <span slot="serial" slot-scope="text, record, index">{{ index + 1 }}</span>
-                    <span slot="status" slot-scope="text">
-                      <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
-                    </span>
-                    <span slot="description" slot-scope="text">
-                      <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
-                    </span>
-
                     <span slot="action" slot-scope="text, record">
                       <template>
                         <!-- 已经采纳的可以删除，未采纳的可以作废 -->
@@ -94,6 +79,39 @@
                       </template>
                     </span>
                   </s-table>
+                </div>
+              </a-col>
+            </a-row>
+          </a-tab-pane>
+          <a-tab-pane loading="true" tab="快速配餐" key="1">
+            <a-row>
+              <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
+                <div style="height:490px; position: relative; top:0; left:0">
+                  <InitModal @currentStep="getCurrent" />
+                  <ConfitFoodTable :step="ConfigFoodStep" />
+                </div>
+              </a-col>
+            </a-row>
+          </a-tab-pane>
+          <a-tab-pane loading="true" tab="打卡历史" key="4">
+            <a-row>
+              <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
+                <div style="min-height: 400px;">
+                  <CardHistory
+                    size="default"
+                    rowKey="key"
+                    :columns="cardHistoryColumns"
+                    :data="loadCardHistory"
+                    showPagination="auto"
+                  >
+                    <span slot="action" slot-scope="text, record">
+                      <template>
+                        <!-- 已经采纳的可以删除，未采纳的可以作废 -->
+                        <a @click="handleEdit(record)">删除</a>
+                        <Confirm ref="confirm" @hideModal="deleteRow(record)" />
+                      </template>
+                    </span>
+                  </CardHistory>
                 </div>
               </a-col>
             </a-row>
@@ -255,13 +273,6 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="打卡历史" key="4">
-            <a-row>
-              <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div style="height:400px; background:skyblue">打卡历史</div>
-              </a-col>
-            </a-row>
-          </a-tab-pane>
         </a-tabs>
       </div>
     </a-card>
@@ -278,6 +289,8 @@ import FormModal from './components/modal/FormModal'
 import CardHistory from './components/table/CardHistoryList'
 import { PageView } from '@/layouts'
 import DetailList from '@/components/tools/DetailList'
+import InitModal from './components/config-food/initModal'
+import ConfitFoodTable from './components/config-food/ConfigFoodTable'
 import {
   Confirm,
   STable,
@@ -405,6 +418,9 @@ export default {
   name: 'Analysis',
   mixins: [mixinDevice],
   components: {
+    ConfitFoodTable,
+    InitModal,
+    CardHistory,
     Confirm,
     FormModal,
     STable,
@@ -426,6 +442,7 @@ export default {
   },
   data() {
     return {
+      ConfigFoodStep: 0,
       // 表单
       options: {
         // 上传图片
@@ -442,6 +459,64 @@ export default {
       toilet: 1, // 是否如厕
       extraFood: 0, // 是否加餐
       form: this.$form.createForm(this),
+      cardHistoryColumns: [
+        {
+          title: '配餐编号',
+          dataIndex: 'no'
+        },
+        {
+          title: '体重',
+          dataIndex: 'weight'
+        },
+        {
+          title: '身高',
+          dataIndex: 'height'
+        },
+        {
+          title: '年纪',
+          dataIndex: 'age'
+        },
+        {
+          title: '是否排便',
+          dataIndex: 'isDefecate'
+        },
+        {
+          title: '昨日早餐',
+          dataIndex: 'yesterdayBreakfirst'
+        },
+        {
+          title: '昨日午餐',
+          dataIndex: 'yesterdayLunch'
+        },
+        {
+          title: '午餐照片',
+          dataIndex: 'lunchImg'
+        },
+        {
+          title: '昨日晚餐',
+          dataIndex: 'yesterdayDinner'
+        },
+        {
+          title: '是否宵夜',
+          dataIndex: 'isNightSnack'
+        },
+        {
+          title: '宵夜',
+          dataIndex: 'nightSnack'
+        },
+        {
+          title: '睡眠时间',
+          dataIndex: 'sleepTime'
+        },
+        {
+          title: '饮水量',
+          dataIndex: 'water'
+        },
+        {
+          title: '小红杯数量',
+          dataIndex: 'cup'
+        }
+      ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
         console.log('loadData.parameter', parameter)
@@ -449,11 +524,13 @@ export default {
           return res.result
         })
       },
-      getCardHistoryList: parameter => {
-        return getCardHistory(Object.assign(parameter, this.queryParam))
+      loadCardHistory: parameter => {
+        return getCardHistory(Object.assign(parameter, this.queryParam)).then(res => {
+          return res.result
+        })
       },
       // custom table alert & rowSelection
-      columns: [
+      configFoodColumns: [
         {
           title: '配餐编号',
           dataIndex: 'no'
@@ -546,7 +623,26 @@ export default {
       }
     }
   },
+  filters: {
+    defecateFilter(isDefecate) {
+      const statusMap = {
+        0: '否',
+        1: '是'
+      }
+      return statusMap[isDefecate]
+    },
+    nightSnackFilter(isNightSnack) {
+      const statusMap = {
+        0: '否',
+        1: '是'
+      }
+      return statusMap[isNightSnack]
+    }
+  },
   methods: {
+    getCurrent(step) {
+      this.ConfigFoodStep = step
+    },
     handleEdit(id) {
       this.$refs.confirm.showModal()
     },
@@ -588,6 +684,8 @@ export default {
     initRadar() {
       this.radarLoading = true
       this.$http.get('/workplace/radar').then(res => {
+        console.log('what', res.result)
+
         const dv = new DataSet.View().source(res.result)
         dv.transform({
           type: 'fold',

@@ -236,6 +236,8 @@ export default {
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
+      console.log('这是一行数据嘛？', selectedRows)
+
       this.selectedRows = selectedRows
     },
     toggleAdvanced() {
