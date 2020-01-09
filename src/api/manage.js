@@ -8,10 +8,18 @@ const api = {
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
   deployhistory: '/deployhistory',
-  cardhistory: '/cardhistory'
+  cardhistory: '/cardhistory',
+  recommendrandom: '/recommendrandom'
 }
 
 export default api
+export function getRecommendRandom(parameter) {
+  return axios({
+    url: api.recommendrandom,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function getUserList(parameter) {
   return axios({

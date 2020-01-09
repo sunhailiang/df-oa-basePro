@@ -4,6 +4,51 @@ import dateFormater from '@/utils/dateFormater'
 
 const totalCount = 5701
 
+const recommendRandom = options => {
+  const nutritionType = options.nutritionType
+  const weight = options.weight
+  const result = []
+
+  result.push({
+    type: '蔬菜类',
+    data: [
+      { key: 1, foodName: '白菜', foodWeight: '178g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 2, foodName: '洋葱', foodWeight: '220g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 3, foodName: '茄子', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 4, foodName: '芹菜', foodWeight: '380g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 5, foodName: '冬瓜', foodWeight: '200g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 6, foodName: '红薯', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 7, foodName: '蒜苗', foodWeight: '320g', nutrient: { C: 9, F: 3, P: 2 } }
+    ]
+  })
+  result.push({
+    type: '水果类',
+    data: [
+      { key: 1, foodName: '西瓜', foodWeight: '500g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 2, foodName: '苹果', foodWeight: '220g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 3, foodName: '百香果', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 4, foodName: '哈密瓜', foodWeight: '380g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 5, foodName: '猕猴桃', foodWeight: '200g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 6, foodName: '橙子', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 7, foodName: '波罗蜜', foodWeight: '120g', nutrient: { C: 9, F: 3, P: 2 } }
+    ]
+  })
+  result.push({
+    type: '谷薯类',
+    data: [
+      { key: 1, foodName: '粳米', foodWeight: '500g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 2, foodName: '糯米', foodWeight: '220g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 3, foodName: '粟米', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 4, foodName: '小麦', foodWeight: '380g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 5, foodName: '燕麦', foodWeight: '200g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 6, foodName: '荞麦', foodWeight: '170g', nutrient: { C: 9, F: 3, P: 2 } },
+      { key: 7, foodName: '玉米', foodWeight: '320g', nutrient: { C: 9, F: 3, P: 2 } }
+    ]
+  })
+
+  return result
+}
+
 const serverList = options => {
   const parameters = getQueryParameters(options)
   const result = []
@@ -338,3 +383,4 @@ Mock.mock(/\/workplace\/activity/, 'get', activity)
 Mock.mock(/\/workplace\/teams/, 'get', teams)
 Mock.mock(/\/workplace\/radar/, 'get', radar)
 Mock.mock(/\/cardhistory/, 'get', cardHistory)
+Mock.mock(/\/recommendrandom/, 'get', recommendRandom)

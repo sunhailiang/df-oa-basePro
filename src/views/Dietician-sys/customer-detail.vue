@@ -289,7 +289,7 @@ import FormModal from './components/modal/FormModal'
 import CardHistory from './components/table/CardHistoryList'
 import { PageView } from '@/layouts'
 import DetailList from '@/components/tools/DetailList'
-import InitModal from './components/config-food/initModal'
+import InitModal from './components/config-food/InitModal'
 import ConfitFoodTable from './components/config-food/ConfigFoodTable'
 import {
   Confirm,

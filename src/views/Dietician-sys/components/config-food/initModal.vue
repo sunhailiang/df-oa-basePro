@@ -7,9 +7,9 @@
         <a-input addonBefore="卡路里" addonAfter="cal" defaultValue="0" size="small" />
       </div>
       <div class="setval" v-if="step === 1">
-        <a-input addonBefore="C" addonAfter="cal" defaultValue="0" size="small" />
-        <a-input addonBefore="F" addonAfter="cal" defaultValue="0" size="small" />
-        <a-input addonBefore="P" addonAfter="cal" defaultValue="0" size="small" />
+        <p><a-input addonBefore="C" addonAfter="cal" defaultValue="0" size="small" /></p>
+        <p><a-input addonBefore="P" addonAfter="cal" defaultValue="0" size="small" /></p>
+        <p><a-input addonBefore="F" addonAfter="cal" defaultValue="0" size="small" /></p>
       </div>
       <div class="nextstep" v-if="step === 0">
         <a-button type="primary" size="small" @click="nextStep">下一步</a-button>

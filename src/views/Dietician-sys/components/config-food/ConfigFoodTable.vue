@@ -63,34 +63,36 @@
     <div class="right">
       <div class="food-type">选择食材</div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag color="cyan">可乐</a-tag></div>
-        <div class="fatFood"><a-tag color="cyan">五花肉</a-tag></div>
-        <div class="proteinFood"><a-tag color="cyan">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
+        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
+        <div class="proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
       </div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag color="cyan">可乐</a-tag></div>
-        <div class="fatFood"><a-tag color="cyan">五花肉</a-tag></div>
-        <div class="proteinFood"><a-tag color="cyan">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
+        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
+        <div class="proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
       </div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag color="cyan">可乐</a-tag></div>
-        <div class="fatFood"><a-tag color="cyan">五花肉</a-tag></div>
-        <div class="proteinFood last-proteinFood"><a-tag color="cyan">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
+        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
+        <div class="proteinFood last-proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
       </div>
     </div>
     <div class="to-img">
       <div class="food-import">导出配餐</div>
       <div>
-        <a-badge count="5" class="import-btn">
+        <a-badge count="5" @click="showImportConfig" class="import-btn">
           <a-icon type="shopping-cart" style="fontSize:30px;" />
         </a-badge>
       </div>
     </div>
     <RecommendFood @setVisible="setVisible" :isShow="show" :params="params" />
+    <ImportConfigFood @setImportVisible="setImportVisible" :isShow="importShow" />
   </div>
 </template>
 <script>
 import RecommendFood from './RecommendFood'
+import ImportConfigFood from './ImportConfig'
 export default {
   name: 'ConfigFoodTable',
   props: {
@@ -104,6 +106,7 @@ export default {
     return {
       weight: 26,
       show: false,
+      importShow: false,
       params: {
         type: '',
         weight: 0
@@ -111,11 +114,21 @@ export default {
     }
   },
   components: {
-    RecommendFood
+    RecommendFood,
+    ImportConfigFood
   },
   methods: {
+    deleteFood() {
+      console.log('删除食物')
+    },
+    showImportConfig() {
+      this.importShow = true
+    },
     setVisible(visible) {
       this.show = visible
+    },
+    setImportVisible(visible) {
+      this.importShow = visible
     },
     getRecommendData(havaType, type) {
       console.log('获取推荐数据', havaType + '+' + type)
