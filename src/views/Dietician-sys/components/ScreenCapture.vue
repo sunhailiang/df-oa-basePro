@@ -24,11 +24,14 @@ export default {
       image.src = canvas.toDataURL('image/png')
       return image
     },
-    capture() {
+    capture(status) {
       this.captureDom(this.html, cvs => {
         let img = this.convertCanvasToImage(cvs)
         this.$emit('getConfigImg', img.src)
       })
+    },
+    getImgUrl() {
+      this.$emit('getConfigImg', img.src)
     },
     captureDom(dom, callback) {
       let shareContent = dom // 需要绘制的部分的 (原生）dom 对象 ，注意容器的宽度不要使用百分比，使用固定宽度，避免缩放问题
@@ -44,7 +47,7 @@ export default {
       let scaleBy = this.getPixelRatio(context) //获取像素密度的方法 (也可以采用自定义缩放比例)
       // let scaleBy = 2;
       canvas.width = width * scaleBy //这里 由于绘制的dom 为固定宽度，居中，所以没有偏移
-      canvas.height = (height + (offsetTop === 55 ? 0 : offsetTop)) * scaleBy + 10 // 注意高度问题，由于顶部有个距离所以要加上顶部的距离，解决图像高度偏移问题
+      canvas.height = (height + (offsetTop === 55 ? 0 : offsetTop)) * scaleBy // 注意高度问题，由于顶部有个距离所以要加上顶部的距离，解决图像高度偏移问题
       context.scale(scaleBy, scaleBy)
       let opts = {
         allowTaint: true, //允许加载跨域的图片
@@ -54,7 +57,7 @@ export default {
         logging: false, //日志开关，发布的时候记得改成false
         width: width, //dom 原始宽度
         height: height, //dom 原始高度
-        x: getAbsLeft(dom),
+        x: getAbsLeft(dom) + 10,
         y: getAbsTop(dom) + window.pageYOffset
       }
       html2canvas(shareContent, opts).then(canvas => {

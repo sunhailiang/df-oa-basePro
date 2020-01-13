@@ -59,7 +59,7 @@
       <div class="salesCard" style="min-height: 400px;">
         <a-tabs default-active-key="1" size="large" :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }">
           <div class="extra-wrapper" slot="tabBarExtraContent"></div>
-          <a-tab-pane tab="配餐历史" key="2">
+          <a-tab-pane tab="配餐历史" key="1">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <div>
@@ -83,7 +83,7 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="快速配餐" key="1">
+          <a-tab-pane loading="true" tab="快速配餐" key="2">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <div style="height:490px; position: relative; top:0; left:0">
@@ -93,7 +93,7 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="打卡历史" key="4">
+          <a-tab-pane loading="true" tab="打卡历史" key="3">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <div style="min-height: 400px;">
@@ -116,7 +116,7 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="协助打卡" key="3">
+          <a-tab-pane loading="true" tab="协助打卡" key="4">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">

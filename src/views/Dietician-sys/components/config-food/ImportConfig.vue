@@ -11,8 +11,15 @@
     >
       <template slot="footer">
         <a-button key="back" @click="handleCancel">取消</a-button>
-        <a-button key="preview" type="primary" icon="picture" @click="showPreviewImg">预览图片</a-button>
-        <a-button key="submit" type="primary" :loading="loading" @click="handleOk">
+        <a-button
+          key="preview"
+          type="primary"
+          ref="preview-btn"
+          :icon="!showImg ? 'picture' : ''"
+          @click="showPreviewImg"
+          >{{ showImgBtnTxt }}</a-button
+        >
+        <a-button key="submit" type="primary" :disabled="showImg" :loading="loading" @click="handleOk">
           确认并导出
         </a-button>
       </template>
@@ -101,12 +108,17 @@ export default {
       loading: false,
       imgUrl: '',
       html: null,
-      showImg: false
+      showImg: false,
+      showImgBtnTxt: '预览图片',
+      isPreview: false
     }
   },
   watch: {
     isShow(val) {
       this.visible = val
+    },
+    imgUrl(val) {
+      val && !this.isPreview && this.downLoadImg(val)
     }
   },
   updated() {
@@ -114,22 +126,34 @@ export default {
   },
   methods: {
     showPreviewImg() {
-      this.getImg()
+      if (!this.showImg) {
+        this.getImg()
+      }
       this.showImg = !this.showImg
+      this.isPreview = !this.isPreview
+      this.showImgBtnTxt = this.showImg ? '取消预览' : '预览图片'
+      !this.isPreview && (this.imgUrl = '')
     },
     ConfigImg(src) {
       this.imgUrl = src
     },
     getImg() {
-      this.$refs.sc.capture()
+      this.$refs.sc.capture(!this.isPreview)
     },
-
+    downLoadImg(url) {
+      var a = document.createElement('a')
+      var event = new MouseEvent('click')
+      a.download = name || '推荐食谱'
+      a.href = url
+      a.dispatchEvent(event)
+    },
     deleteFood() {
       console.log('删除配置食材')
     },
     setImportStyle() {
       return {
-        padding: 0
+        padding: 0,
+        minHeight: '450px'
       }
     },
     showModal() {
@@ -138,12 +162,12 @@ export default {
     },
     handleOk(e) {
       this.loading = true
-      this.getImg()
+      this.getImg() // 获取图片
       setTimeout(() => {
         this.visible = false
         this.$emit('setImportVisible', this.visible)
         this.loading = false
-      }, 2000000)
+      }, 2000)
     },
     handleCancel(e) {
       console.log('Clicked cancel button')
