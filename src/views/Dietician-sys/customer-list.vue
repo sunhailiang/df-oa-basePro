@@ -9,7 +9,7 @@
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
-            <a-form-item label="性别">
+            <a-form-item label="性别g">
               <a-select v-model="queryParam.gender" placeholder="请选择" default-value="0">
                 <a-select-option value="0">女</a-select-option>
                 <a-select-option value="1">男</a-select-option>
@@ -23,8 +23,16 @@
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="地区">
-                <a-date-picker v-model="queryParam.area" style="width: 100%" placeholder="请输入更新日期" />
+              <a-form-item label="地区" @click="getDom($event)">
+                <a-date-picker
+                  id="dp"
+                  v-model="queryParam.area"
+                  style="width: 100%;"
+                  placeholder="请输入更新日期"
+                  @openChange="handlePanelChange"
+                  ref="currentDate"
+                >
+                </a-date-picker>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
@@ -219,25 +227,29 @@ export default {
   },
 
   methods: {
+    getDom(el) {
+      console.log('el', el)
+    },
+    handlePanelChange(isShow) {
+      if (isShow) {
+        console.log('找找看吧,', this.$refs.currentDate.$children)
+        setTimeout(console.log(document.getElementsByClassName('ant-calendar-input-wrap')[0]), 2000)
+      }
+    },
     saveUser(values) {
       console.log('保存新用户啊', values)
     },
     CreateUser(id) {
       this.$refs.addUserModal.openModal()
-      console.log('创建永华')
     },
     handleEdit(id) {
       this.$router.push(`/customer/detail/${id}`)
     },
     handleOk(values) {
-      console.log('保存数据？？？？', values)
-
       this.$refs.modal.closeModal()
     },
     onSelectChange(selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
-      console.log('这是一行数据嘛？', selectedRows)
-
       this.selectedRows = selectedRows
     },
     toggleAdvanced() {
@@ -253,6 +265,9 @@ export default {
 </script>
 
 <style lang="less" scoped>
+#dp {
+  background: red;
+}
 .table-operator {
   padding: 1rem;
   padding-left: 0;

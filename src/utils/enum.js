@@ -11,4 +11,11 @@ const foodTypeEnum = {
   坚果类: 10
 }
 
-export { foodTypeEnum }
+const MealTimes = {
+  早餐: 0,
+  午餐: 1,
+  晚餐: 2,
+  不喜欢: 3
+}
+
+export { foodTypeEnum, MealTimes }

@@ -20,8 +20,63 @@
           </a-select>
         </a-form-item>
 
-        <a-form-item v-if="cause === 1" label="不喜欢哪些食品(逗号分割)" :labelCol="labelCol" :wrapperCol="wrapperCol">
-          <a-textarea :rows="4" v-decorator="['desc', { rules: [{ required: true }] }]"></a-textarea>
+        <a-form-item v-if="cause === 1" label="配餐食材" :labelCol="labelCol" :wrapperCol="wrapperCol">
+          <div class="selectedFood">
+            <div class="breakfast-container container">
+              <div class="breakfast type">早餐</div>
+              <div class="food">
+                <a-tag
+                  v-for="(item, index) in breakfast"
+                  closable
+                  @close="close(MealTimes.早餐, item)"
+                  :key="index"
+                  color="#108ee9"
+                  >{{ item }}</a-tag
+                >
+              </div>
+            </div>
+            <div class="lunch-container container">
+              <div class="lunch type">午餐</div>
+
+              <div class="food">
+                <a-tag
+                  v-for="(item, index) in lunch"
+                  closable
+                  @close="close(MealTimes.午餐, item)"
+                  :key="index"
+                  color="#108ee9"
+                >
+                  {{ item }}</a-tag
+                >
+              </div>
+            </div>
+            <div class="diner-container container">
+              <div class="dinner type">晚餐</div>
+
+              <div class="food">
+                <a-tag
+                  v-for="(item, index) in dinner"
+                  closable
+                  @close="close(MealTimes.晚餐, item)"
+                  :key="index"
+                  color="#108ee9"
+                  >{{ item }}</a-tag
+                >
+              </div>
+            </div>
+          </div>
+        </a-form-item>
+        <a-form-item v-if="cause === 1" label="客户不喜欢:" :labelCol="labelCol" :wrapperCol="wrapperCol">
+          <div class="dislike-container">
+            <a-tag
+              v-for="(item, index) in dislike"
+              closable
+              @close="close(MealTimes.不喜欢, item)"
+              :key="index"
+              color="#108ee9"
+              >{{ item.value }}</a-tag
+            >
+          </div>
         </a-form-item>
       </a-form>
     </a-spin>
@@ -33,6 +88,7 @@
 </template>
 
 <script>
+import { MealTimes } from '@/utils/enum.js'
 export default {
   name: 'FormModal',
   data() {
@@ -50,17 +106,42 @@ export default {
       confirmLoading: false,
       currentStep: 0,
       mdl: {},
-
-      form: this.$form.createForm(this)
+      MealTimes,
+      form: this.$form.createForm(this),
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      dislike: []
     }
   },
   methods: {
-    openModal(id) {
-      this.visible = true
-      console.log('存储数据', id)
-
-      this.$nextTick(() => {
-        // setFieldsValue(pick(record, []))
+    close(type, value) {
+      // 删除不喜欢的食材
+      ;(type === 0 || type === 1 || type === 2) && this.dislike.push({ type, value })
+      // 恢复食材
+      type === 3 &&
+        (value.type === 0
+          ? this.breakfast.push(value.value)
+          : value.type === 1
+          ? this.lunch.push(value.value)
+          : value.type === 2
+          ? this.dinner.push(value.value)
+          : '')
+    },
+    openModal(rowData) {
+      if (rowData) {
+        this.visible = true
+        let tempBreakFirst = rowData['breakfast'].split(',')
+        this.getArray(tempBreakFirst, this.breakfast) // 获取食材
+        let tempLuch = rowData['lunch'].split(',')
+        this.getArray(tempLuch, this.lunch)
+        let dinnerTemp = rowData['dinner'].split(',')
+        this.getArray(dinnerTemp, this.dinner)
+      }
+    },
+    getArray(arr, resArr) {
+      arr.forEach(el => {
+        resArr.push(el.split('(')[0])
       })
     },
     closeModal() {
@@ -82,3 +163,38 @@ export default {
   }
 }
 </script>
+<style lang="less" scoped>
+.dislike-container {
+  border: 1px solid #d9d9d9;
+  min-height: 40px;
+  border-radius: 4px;
+}
+.selectedFood {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  .container {
+    border-bottom: 1px solid #d9d9d9;
+    overflow: hidden;
+    .type {
+      width: 22%;
+      text-align: center;
+      float: left;
+      border-right: 1px solid #d9d9d9;
+      height: 80px;
+      line-height: 80px;
+    }
+    .food {
+      width: 77%;
+      float: left;
+      .ant-tag {
+        float: left;
+        margin: 4px;
+      }
+      height: 80px;
+    }
+  }
+  .container:last-child {
+    border-bottom: none;
+  }
+}
+</style>

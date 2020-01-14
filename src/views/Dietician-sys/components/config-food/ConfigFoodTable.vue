@@ -63,19 +63,21 @@
     <div class="right">
       <div class="food-type">选择食材</div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
-        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
-        <div class="proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag @click="showEdit" color="#108ee9">可乐(300g)</a-tag></div>
+        <div class="fatFood"><a-tag @click="showEdit" color="#108ee9">五花肉(200g)</a-tag></div>
+        <div class="proteinFood"><a-tag @click="showEdit" color="#108ee9">豆浆(200g)</a-tag></div>
       </div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
-        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
-        <div class="proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag @click="showEdit" color="#108ee9">可乐(300g)</a-tag></div>
+        <div class="fatFood"><a-tag @click="showEdit" color="#108ee9">五花肉(300)</a-tag></div>
+        <div class="proteinFood"><a-tag @click="showEdit" color="#108ee9">豆浆(200)</a-tag></div>
       </div>
       <div class="food">
-        <div class="carbohydrateFood"><a-tag closable @close="deleteFood" color="#108ee9">可乐</a-tag></div>
-        <div class="fatFood"><a-tag closable @close="deleteFood" color="#108ee9">五花肉</a-tag></div>
-        <div class="proteinFood last-proteinFood"><a-tag closable @close="deleteFood" color="#108ee9">豆浆</a-tag></div>
+        <div class="carbohydrateFood"><a-tag @click="showEdit" color="#108ee9">可乐(100)</a-tag></div>
+        <div class="fatFood"><a-tag @click="showEdit" color="#108ee9">五花肉(200)</a-tag></div>
+        <div class="proteinFood last-proteinFood">
+          <a-tag @click="showEdit" color="#108ee9">豆浆(200)</a-tag>
+        </div>
       </div>
     </div>
     <div class="to-img">
@@ -88,11 +90,13 @@
     </div>
     <RecommendFood @setVisible="setVisible" :isShow="show" :params="params" />
     <ImportConfigFood @setImportVisible="setImportVisible" :isShow="importShow" />
+    <EditValue ref="edit" />
   </div>
 </template>
 <script>
 import RecommendFood from './RecommendFood'
 import ImportConfigFood from './ImportConfig'
+import EditValue from './EditValue'
 export default {
   name: 'ConfigFoodTable',
   props: {
@@ -110,14 +114,24 @@ export default {
       params: {
         type: '',
         weight: 0
-      }
+      },
+      editObj: {}
     }
   },
   components: {
     RecommendFood,
-    ImportConfigFood
+    ImportConfigFood,
+    EditValue
   },
   methods: {
+    showEdit(e) {
+      this.editObj.value = e.target.innerText
+        .split('(')[1]
+        .split(')')[0]
+        .split('g')[0]
+      this.editObj.type = e.target.innerText.split('(')[0]
+      this.$refs.edit.showModal(this.editObj)
+    },
     deleteFood() {
       console.log('删除食物')
     },

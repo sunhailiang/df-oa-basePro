@@ -88,7 +88,7 @@
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <div style="height:490px; position: relative; top:0; left:0">
                   <InitModal @currentStep="getCurrent" />
-                  <ConfitFoodTable :step="ConfigFoodStep" />
+                  <ConfigFoodTable :step="ConfigFoodStep" />
                 </div>
               </a-col>
             </a-row>
@@ -290,7 +290,7 @@ import CardHistory from './components/table/CardHistoryList'
 import { PageView } from '@/layouts'
 import DetailList from '@/components/tools/DetailList'
 import InitModal from './components/config-food/InitModal'
-import ConfitFoodTable from './components/config-food/ConfigFoodTable'
+import ConfigFoodTable from './components/config-food/ConfigFoodTable'
 import {
   Confirm,
   STable,
@@ -418,7 +418,7 @@ export default {
   name: 'Analysis',
   mixins: [mixinDevice],
   components: {
-    ConfitFoodTable,
+    ConfigFoodTable,
     InitModal,
     CardHistory,
     Confirm,
@@ -461,7 +461,7 @@ export default {
       form: this.$form.createForm(this),
       cardHistoryColumns: [
         {
-          title: '配餐编号',
+          title: '编号',
           dataIndex: 'no'
         },
         {
@@ -532,7 +532,7 @@ export default {
       // custom table alert & rowSelection
       configFoodColumns: [
         {
-          title: '配餐编号',
+          title: '配餐',
           dataIndex: 'no'
         },
         {
@@ -650,8 +650,8 @@ export default {
       console.log('确认删除')
       this.$refs.confirm.hideModal()
     },
-    openInvalidModal(id) {
-      this.$refs.modal.openModal(id)
+    openInvalidModal(rowData) {
+      this.$refs.modal.openModal(rowData)
     },
     handleOk(values) {
       console.log('保存数据？？？？', values)
