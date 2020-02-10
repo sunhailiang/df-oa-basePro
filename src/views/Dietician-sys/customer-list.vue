@@ -23,7 +23,7 @@
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
-              <a-form-item label="地区" @click="getDom($event)">
+              <a-form-item label="地区" >
                 <a-date-picker
                   id="dp"
                   v-model="queryParam.area"
