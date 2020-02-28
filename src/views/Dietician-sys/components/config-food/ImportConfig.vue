@@ -29,32 +29,25 @@
           <div class="type">
             <div class="type-name">早餐</div>
             <div class="food-name">
-              <span class="tag" closable @close="deleteFood" color="#108ee9">玉米(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">牛奶(300g)</span>
+              <span class="tag" v-for="item of breakFast" :key="item.oid" closable @close="deleteFood" color="#108ee9"
+                >{{ item.name }}({{ item.value }}g)</span
+              >
             </div>
           </div>
           <div class="type">
             <div class="type-name">午餐</div>
             <div class="food-name">
-              <span class="tag" closable @close="deleteFood" color="#108ee9">五花肉(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">米饭(270g)</span>
+              <span class="tag" v-for="item of lunch" :key="item.oid" closable @close="deleteFood" color="#108ee9"
+                >{{ item.name }}({{ item.value }}g)</span
+              >
             </div>
           </div>
           <div class="type">
             <div class="type-name last">晚餐</div>
             <div class="food-name ">
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">苹果(300g)</span>
-              <span class="tag" closable @close="deleteFood" color="#108ee9">香蕉(200g)</span>
+              <span class="tag" v-for="item of dinner" :key="item.oid" closable @close="deleteFood" color="#108ee9"
+                >{{ item.name }}({{ item.value }}g)</span
+              >
             </div>
           </div>
         </div>
@@ -64,17 +57,17 @@
           </div>
           <div class="config-info">
             <div class="configNum">配餐编号</div>
-            <div class="configCode"><QrCode :text="qrcodeTxt" /></div>
+            <div class="configCode"><QrCode :text="this.guid()" /></div>
           </div>
           <div class="customer">
             <div class="customer-name">客户姓名</div>
-            <div class="customer-name-value">张小凡</div>
+            <div class="customer-name-value">{{ userDetail.userName }}</div>
             <div class="customer-name">客户性别</div>
-            <div class="customer-name">男</div>
+            <div class="customer-name">{{ userDetail.sex === 1 ? '男' : '女' }}</div>
           </div>
           <div class="dietician">
             <div class="dieticianer">专属营养师</div>
-            <div class="dieticianer">哮天犬</div>
+            <div class="dieticianer">{{ userDetail.supporterName }}</div>
           </div>
         </div>
       </div>
@@ -89,13 +82,20 @@
 import html2canvas from 'html2canvas'
 import ScreenCapture from '../ScreenCapture'
 import QrCode from '@/components/Utils/QrCode'
+import { addDiet } from '@/api/manage'
 export default {
   name: 'ImportConfig',
   props: {
+    userDetail: Object,
     isShow: {
       type: Boolean,
       default: false
-    }
+    },
+    tb: {
+      type: Object
+    },
+    recommendDailyFoodComponent: Object,
+    resParams: {}
   },
   components: {
     ScreenCapture,
@@ -110,12 +110,17 @@ export default {
       html: null,
       showImg: false,
       showImgBtnTxt: '预览图片',
-      isPreview: false
+      isPreview: false,
+      shwoData: {},
+      breakFast: [],
+      lunch: [],
+      dinner: []
     }
   },
   watch: {
     isShow(val) {
       this.visible = val
+      val ? this.processingData(this.tb) : ''
     },
     imgUrl(val) {
       val && !this.isPreview && this.downLoadImg(val)
@@ -125,6 +130,223 @@ export default {
     this.html = this.$refs.importToImg
   },
   methods: {
+    addDiet() {
+      // 存储数据
+      let arr = {
+        mealList: [
+          { name: 'Breakfast', food: [] },
+          { name: 'Lunch', food: [] },
+          { name: 'Dinner', food: [] }
+        ]
+      }
+      for (let key in this.tb) {
+        switch (key) {
+          case 'breakfastP':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Breakfast'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Breakfast: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'breakfastF':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Breakfast'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Breakfast: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'breakfastC':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Breakfast'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Breakfast: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'lunchP':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Lunch'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Lunch: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'lunchF':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Lunch'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Lunch: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'lunchC':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Lunch'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Lunch: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'dinnerP':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Dinner'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Dinner: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'dinnerF':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Dinner'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Dinner: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+          case 'dinnerC':
+            for (let i = 0; i < this.tb[key].length; i++) {
+              for (let j = 0; j < arr.mealList.length; j++) {
+                arr.mealList[j].name == 'Dinner'
+                  ? arr.mealList[j].food.push(
+                      JSON.stringify({
+                        Dinner: this.tb[key][i].name + '(' + this.tb[key][i].value + 'g' + ')',
+                        oid: this.tb[key][i].oid
+                      })
+                    )
+                  : ''
+              }
+            }
+            break
+        }
+      }
+
+      for (let i = 0; i < arr.mealList.length; i++) {
+        arr.mealList[i].food = arr.mealList[i].food.toString()
+      }
+
+      let currentUserOid = this.$store.state.userInfo.oid
+      let customerOid = this.$route.params.id
+      let serviceOid = this.userDetail.serviceOid
+      console.log('customerOid', customerOid)
+
+      let parameter = {
+        dietOid: this.guid(),
+        customerOid: customerOid,
+        serviceOid: serviceOid,
+        recommendDailyEnergy: this.resParams.recommendDailyEnergy,
+        recommendDailyComponentPercentage: JSON.stringify(this.resParams.recommendDailyComponentPercentage),
+        recommendDailyFoodComponent: JSON.stringify(this.recommendDailyFoodComponent),
+        currentDailyEnergy: this.resParams.currentDailyEnergy,
+        currentDailyComponentPercentage: this.resParams.currentRatioStr,
+        currentDiet: JSON.stringify(arr),
+        supporterOid: currentUserOid
+      }
+
+      addDiet(parameter).then(res => {
+        if (res.success) {
+          setTimeout(() => {
+            this.$notification.success({
+              message: '添加配餐成功'
+            })
+            this.visible = true
+            this.$store.state.activeKey = '1'
+          }, 1000)
+        } else {
+          this.$notification['error']({
+            message: '请求出错',
+            description: res.message + ':' + res.reponse,
+            duration: 4
+          })
+        }
+      })
+    },
+    processingData(data) {
+      for (let key in data) {
+        for (let i = 0; i < data[key].length; i++) {
+          switch (key) {
+            case 'breakfastP':
+              this.breakFast.push(data[key][i])
+              break
+            case 'breakfastF':
+              this.breakFast.push(data[key][i])
+              break
+            case 'breakfastC':
+              this.breakFast.push(data[key][i])
+              break
+            case 'lunchP':
+              this.lunch.push(data[key][i])
+              break
+            case 'lunchF':
+              this.lunch.push(data[key][i])
+              break
+            case 'lunchC':
+              this.lunch.push(data[key][i])
+              break
+            case 'dinnerP':
+              this.dinner.push(data[key][i])
+              break
+            case 'dinnerF':
+              this.dinner.push(data[key][i])
+              break
+            case 'dinnerC':
+              this.dinner.push(data[key][i])
+              break
+            default:
+          }
+        }
+      }
+    },
+
     showPreviewImg() {
       if (!this.showImg) {
         this.getImg()
@@ -133,6 +355,12 @@ export default {
       this.isPreview = !this.isPreview
       this.showImgBtnTxt = this.showImg ? '取消预览' : '预览图片'
       !this.isPreview && (this.imgUrl = '')
+    },
+    guid() {
+      function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+      }
+      return S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4()
     },
     ConfigImg(src) {
       this.imgUrl = src
@@ -161,17 +389,24 @@ export default {
       this.$emit('setImportVisible', this.visible)
     },
     handleOk(e) {
+      console.log('GUID', this.guid())
       this.loading = true
       this.getImg() // 获取图片
       setTimeout(() => {
         this.visible = false
+        this.breakFast = []
+        this.lunch = []
+        this.dinner = []
         this.$emit('setImportVisible', this.visible)
+        this.addDiet()
         this.loading = false
-      }, 2000)
+      }, 1000)
     },
     handleCancel(e) {
-      console.log('Clicked cancel button')
       this.visible = false
+      this.breakFast = []
+      this.lunch = []
+      this.dinner = []
       this.$emit('setImportVisible', this.visible)
     }
   }

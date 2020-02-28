@@ -2,53 +2,56 @@
   <div class="page-header-index-wide">
     <page-view :avatar="avatar" :title="false">
       <detail-list slot="headerContent" size="small" :col="2" class="detail-layout">
-        <detail-list-item term="客户姓名">张女士</detail-list-item>
-        <detail-list-item term="性别">女</detail-list-item>
-        <detail-list-item term="联系方式">188888888888</detail-list-item>
-        <detail-list-item term="归属客服"><a>张经理</a></detail-list-item>
-        <detail-list-item term="归属代理">张经理</detail-list-item>
-        <detail-list-item term="身高">160</detail-list-item>
-        <detail-list-item term="职业">金融白领</detail-list-item>
-        <detail-list-item term="所在地区">上海</detail-list-item>
+        <detail-list-item
+          v-for="item in Object.keys(usertails).filter(
+            res => res != 'oid' && res != 'age' && res != 'initWeight' && res != 'city' && res != 'serviceName'
+          )"
+          :key="item.oid"
+          :term="
+            item == 'userName'
+              ? '用户姓名'
+              : item == 'sex'
+              ? '性别'
+              : item == 'cellphone'
+              ? '联系方式'
+              : item == 'supporterName'
+              ? '归属客服'
+              : item == 'agenterName'
+              ? '归属代理'
+              : item == 'initHeight'
+              ? '身高'
+              : item == 'jobName'
+              ? '职业'
+              : '地区'
+          "
+          >{{
+            item == 'sex' && usertails[item] == 0
+              ? '女'
+              : item == 'sex' && usertails[item] == 1
+              ? '男'
+              : usertails[item]
+          }}</detail-list-item
+        >
       </detail-list>
     </page-view>
     <a-row :gutter="40" class="chart">
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
-        <a-card
-          title="体重"
-          style="margin-bottom: 24px"
-          :loading="radarLoading"
-          :bordered="false"
-          :body-style="{ padding: 0 }"
-        >
+        <a-card title="体重" style="margin-bottom: 24px" :bordered="false" :body-style="{ padding: 0 }">
           <div style="min-height: 400px;">
-            <LineChart :arr="lineData" />
+            <LineChart :arr="weight" />
           </div>
         </a-card>
       </a-col>
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
-        <a-card
-          title="BMI"
-          style="margin-bottom: 24px"
-          :loading="radarLoading"
-          :bordered="false"
-          :body-style="{ padding: 0 }"
-        >
+        <a-card title="BMI" style="margin-bottom: 24px" :bordered="false" :body-style="{ padding: 0 }">
           <div style="min-height: 400px;">
-            <LineChart :arr="lineData" />
+            <LineChart :arr="bmi" />
           </div>
         </a-card>
       </a-col>
       <a-col :sm="24" :md="12" :xl="8" :style="{ marginBottom: '24px' }">
-        <a-card
-          title="体质测试"
-          style="margin-bottom: 24px"
-          :loading="radarLoading"
-          :bordered="false"
-          :body-style="{ padding: 0 }"
-        >
+        <a-card title="体质测试" style="margin-bottom: 24px" :bordered="false" :body-style="{ padding: 0 }">
           <div style="min-height: 400px;">
-            <!-- :scale="scale" :axis1Opts="axis1Opts" :axis2Opts="axis2Opts"  -->
             <radar :data="radarData" />
           </div>
         </a-card>
@@ -57,7 +60,12 @@
 
     <a-card :loading="loading" :bordered="false" :body-style="{ padding: '0' }">
       <div class="salesCard" style="min-height: 400px;">
-        <a-tabs default-active-key="1" size="large" :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }">
+        <a-tabs
+          @change="setActiveKey"
+          :activeKey="this.activeKey.toString()"
+          size="large"
+          :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }"
+        >
           <div class="extra-wrapper" slot="tabBarExtraContent"></div>
           <a-tab-pane tab="配餐历史" key="1">
             <a-row>
@@ -66,7 +74,7 @@
                   <s-table
                     ref="table"
                     size="default"
-                    rowKey="key"
+                    rowKey="oid"
                     :columns="configFoodColumns"
                     :data="loadData"
                     showPagination="auto"
@@ -74,8 +82,9 @@
                     <span slot="action" slot-scope="text, record">
                       <template>
                         <!-- 已经采纳的可以删除，未采纳的可以作废 -->
-                        <a @click="handleEdit(record)">删除</a> <a @click="openInvalidModal(record)">作废</a>
-                        <Confirm ref="confirm" @hideModal="deleteRow(record)" />
+                        <!-- <a @click="handleEdit({ record, type: 1 })">删除</a> -->
+                        <a @click="openInvalidModal(record)">作废</a>
+                        <Confirm ref="confirm" :isShow="isShow" :title="title" @doDelete="deleteRow(record)" />
                       </template>
                     </span>
                   </s-table>
@@ -83,12 +92,17 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="快速配餐" key="2">
+          <a-tab-pane a-tab-pane loading="true" tab="快速配餐" key="2">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
                 <div style="height:490px; position: relative; top:0; left:0">
                   <InitModal @currentStep="getCurrent" />
-                  <ConfigFoodTable :step="ConfigFoodStep" />
+                  <ConfigFoodTable
+                    v-if="ConfigFoodStep.step === 2"
+                    :userDetail="usertails"
+                    :resParams="this.resParams"
+                    :step="ConfigFoodStep"
+                  />
                 </div>
               </a-col>
             </a-row>
@@ -99,16 +113,17 @@
                 <div style="min-height: 400px;">
                   <CardHistory
                     size="default"
-                    rowKey="key"
+                    rowKey="id"
                     :columns="cardHistoryColumns"
                     :data="loadCardHistory"
                     showPagination="auto"
                   >
+                    <img style="width:80px;height:40px" slot="pic" slot-scope="text, record" :src="record.lunchImg" />
                     <span slot="action" slot-scope="text, record">
                       <template>
                         <!-- 已经采纳的可以删除，未采纳的可以作废 -->
-                        <a @click="handleEdit(record)">删除</a>
-                        <Confirm ref="confirm" @hideModal="deleteRow(record)" />
+                        <a @click="handleEdit({ record, type: 2 })">删除</a>
+                        <Confirm :title="title" :isShow="isShow" ref="confirm" @doDelete="deleteRow(record)" />
                       </template>
                     </span>
                   </CardHistory>
@@ -144,15 +159,12 @@
                       />
                     </a-form-item>
                     <a-form-item
-                      label="年龄"
+                      label="补卡日期"
+                      v-decorator="['AssistDate', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
                       :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                       :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                     >
-                      <a-input
-                        v-decorator="['age', { rules: [{ required: true, message: '请输入年龄' }] }]"
-                        name="age"
-                        placeholder="请输入年龄"
-                      />
+                      <a-date-picker @change="getDate" style="width:33.3vw" />
                     </a-form-item>
                     <a-form-item
                       label="是否排便后称重"
@@ -192,12 +204,7 @@
                       :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                       :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                     >
-                      <a-upload
-                        name="file"
-                        :beforeUpload="beforeUpload"
-                        :showUploadList="false"
-                        v-decorator="['file', { rules: [{ required: true, message: '请上传午餐照片' }] }]"
-                      >
+                      <a-upload name="file" :beforeUpload="beforeUpload" :showUploadList="false">
                         <a-button icon="upload">选择图片</a-button>
                       </a-upload>
                     </a-form-item>
@@ -219,12 +226,12 @@
                       :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       :required="false"
                     >
-                      <a-radio-group v-model="extraFood">
-                        <a-radio :value="0">没有</a-radio>
-                        <a-radio :value="1">有</a-radio>
+                      <a-radio-group v-model="isExtraFood">
+                        <a-radio :value="1">没有</a-radio>
+                        <a-radio :value="2">有</a-radio>
                       </a-radio-group>
                       <a-textarea
-                        v-if="extraFood == 1"
+                        v-if="isExtraFood == 2"
                         rows="3"
                         placeholder="请输入加餐食物"
                         v-decorator="['extraFood', { rules: [{ required: true, message: '请输入加餐食物' }] }]"
@@ -235,11 +242,36 @@
                       :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                       :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                     >
-                      <a-input
-                        v-decorator="['sleepTime', { rules: [{ required: true, message: '请输入入睡时间' }] }]"
-                        name="sleepTime"
-                        placeholder="请输入入睡时间"
-                      />
+                      <a-select
+                        defaultValue="22:00~23:00"
+                        style="width:33.33vw"
+                        placeholder="请选择睡眠时间"
+                        v-decorator="['sleepTime', { rules: [{ required: true, message: '请选择睡眠时间' }] }]"
+                      >
+                        <a-select-option value="0:00~1:00">0:00~1:00</a-select-option>
+                        <a-select-option value="1:00~2:00">1:00~2:00</a-select-option>
+                        <a-select-option value="2:00~3:00">2:00~3:00</a-select-option>
+                        <a-select-option value="3:00~4:00">3:00~4:00</a-select-option>
+                        <a-select-option value="4:00~5:00">4:00~5:00</a-select-option>
+                        <a-select-option value="5:00~6:00">5:00~6:00</a-select-option>
+                        <a-select-option value="6:00~7:00">6:00~7:00</a-select-option>
+                        <a-select-option value="7:00~8:00">7:00~8:00</a-select-option>
+                        <a-select-option value="8:00~9:00">8:00~9:00</a-select-option>
+                        <a-select-option value="9:00~10:00">9:00~10:00</a-select-option>
+                        <a-select-option value="10:00~11:00">10:00~11:00</a-select-option>
+                        <a-select-option value="11:00~12:00">11:00~12:00</a-select-option>
+                        <a-select-option value="12:00~13:00">12:00~13:00</a-select-option>
+                        <a-select-option value="13:00~14:00">13:00~14:00</a-select-option>
+                        <a-select-option value="14:00~15:00">14:00~15:00</a-select-option>
+                        <a-select-option value="15:00~16:00">15:00~16:00</a-select-option>
+                        <a-select-option value="16:00~17:00">16:00~17:00</a-select-option>
+                        <a-select-option value="17:00~18:00">17:00~18:00</a-select-option>
+                        <a-select-option value="18:00~19:00">18:00~19:00</a-select-option>
+                        <a-select-option value="19:00~20:00">19:00~20:00</a-select-option>
+                        <a-select-option value="20:00~21:00">20:00~21:00</a-select-option>
+                        <a-select-option value="21:00~22:00">21:00~22:00</a-select-option>
+                        <a-select-option value="22:00~23:00">22:00~23:00</a-select-option>
+                      </a-select>
                     </a-form-item>
                     <a-form-item
                       label="饮水量"
@@ -249,7 +281,7 @@
                       <a-input
                         v-decorator="['water', { rules: [{ required: true, message: '请输入饮水量' }] }]"
                         name="water"
-                        placeholder="请输入饮水量(ml)"
+                        placeholder="请输入饮水量(L)"
                       />
                     </a-form-item>
                     <a-form-item
@@ -266,7 +298,6 @@
 
                     <a-form-item :wrapperCol="{ span: 24 }" style="text-align: center">
                       <a-button htmlType="submit" type="primary">提交</a-button>
-                      <a-button style="margin-left: 8px">保存</a-button>
                     </a-form-item>
                   </a-form>
                 </a-card>
@@ -283,6 +314,7 @@
 <script>
 import moment from 'moment'
 import { timeFix } from '@/utils/util'
+import dateFormater from '@/utils/dateFormater'
 import { mapState } from 'vuex'
 import HeadInfo from '@/components/tools/HeadInfo'
 import FormModal from './components/modal/FormModal'
@@ -308,7 +340,21 @@ import {
 } from '@/components'
 
 import { mixinDevice } from '@/utils/mixin'
-import { getDeployHistory, getCardHistory } from '@/api/manage'
+import {
+  getDeployHistory,
+  getCardHistory,
+  getUserInfo,
+  getBMI,
+  getMecumery,
+  getWeight,
+  getDingList,
+  getDietList,
+  ding,
+  dingImg,
+  deleteDiet,
+  deleteDing
+} from '@/api/manage'
+import LoginVue from '../user/Login.vue'
 const DetailListItem = DetailList.Item
 const barData = []
 const barData2 = []
@@ -353,28 +399,6 @@ const searchUserScale = [
   }
 ]
 
-const searchTableColumns = [
-  {
-    dataIndex: 'index',
-    title: '排名',
-    width: 90
-  },
-  {
-    dataIndex: 'keyword',
-    title: '搜索关键词'
-  },
-  {
-    dataIndex: 'count',
-    title: '用户数'
-  },
-  {
-    dataIndex: 'range',
-    title: '周涨幅',
-    align: 'right',
-    sorter: (a, b) => a.range - b.range,
-    scopedSlots: { customRender: 'range' }
-  }
-]
 const searchData = []
 for (let i = 0; i < 50; i += 1) {
   searchData.push({
@@ -414,6 +438,10 @@ dv.transform({
 })
 const pieData = dv.rows
 
+const formatter = val => {
+  return val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : ''
+}
+
 export default {
   name: 'Analysis',
   mixins: [mixinDevice],
@@ -442,7 +470,19 @@ export default {
   },
   data() {
     return {
-      ConfigFoodStep: 0,
+      activeKey: this.$store.state.activeKey,
+      dingDate: '',
+      uploadList: [],
+      isShow: true,
+      title: '',
+      usertails: [],
+      bmi: [],
+      mecumery: [],
+      weight: [],
+      dinglist: [],
+      getdietlist: [],
+      ConfigFoodStep: {},
+      resParams: {},
       // 表单
       options: {
         // 上传图片
@@ -457,12 +497,12 @@ export default {
         }
       },
       toilet: 1, // 是否如厕
-      extraFood: 0, // 是否加餐
+      isExtraFood: 1, // 是否加餐
       form: this.$form.createForm(this),
       cardHistoryColumns: [
         {
           title: '编号',
-          dataIndex: 'no'
+          dataIndex: 'id'
         },
         {
           title: '体重',
@@ -478,7 +518,10 @@ export default {
         },
         {
           title: '是否排便',
-          dataIndex: 'isDefecate'
+          dataIndex: 'isDefecate',
+          customRender: val => {
+            return val === 'right' ? '是' : '否'
+          }
         },
         {
           title: '昨日早餐',
@@ -490,7 +533,8 @@ export default {
         },
         {
           title: '午餐照片',
-          dataIndex: 'lunchImg'
+          dataIndex: 'lunchImg',
+          scopedSlots: { customRender: 'pic' }
         },
         {
           title: '昨日晚餐',
@@ -498,7 +542,10 @@ export default {
         },
         {
           title: '是否宵夜',
-          dataIndex: 'isNightSnack'
+          dataIndex: 'isNightSnack',
+          customRender: val => {
+            return val === 'right' ? '是' : '否'
+          }
         },
         {
           title: '宵夜',
@@ -515,57 +562,87 @@ export default {
         {
           title: '小红杯数量',
           dataIndex: 'cup'
+        },
+        {
+          title: '操作',
+          dataIndex: 'action',
+          scopedSlots: { customRender: 'action' }
         }
       ],
       // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        console.log('loadData.parameter', parameter)
-        return getDeployHistory(Object.assign(parameter, this.queryParam)).then(res => {
-          return res.result
-        })
-      },
+      loadData: this.getData(),
       loadCardHistory: parameter => {
-        return getCardHistory(Object.assign(parameter, this.queryParam)).then(res => {
-          return res.result
+        const params = { pageIndex: parameter.pageNo, pageSize: parameter.pageSize, oid: this.$route.params.id }
+        return getDingList(params).then(res => {
+          if (res.success) {
+            let list = res.response.dingList.data
+            let temp = []
+            Object.assign(temp, list)
+            let arr = []
+            for (let i = 0; i < temp.length; i++) {
+              let obj = {}
+              obj['id'] = temp[i].id
+              obj['firstAnswerGuid'] = temp[i].firstAnswerGuid
+              for (let j = 0; j < temp[i].dingList.length; j++) {
+                if (temp[i].dingList[j].question === '午餐拍照') {
+                  temp[i].dingList[j].answer = JSON.parse(temp[i].dingList[j].answer)[0]
+                }
+                obj[this.getKey(temp[i].dingList[j].question)] = temp[i].dingList[j].answer
+              }
+              arr.push(obj)
+            }
+            Object.assign(res.response.dingList.data, arr)
+            return res.response.dingList
+          } else {
+            return {
+              pageIndex: 1,
+              pageSize: 10,
+              dataCount: 0,
+              pageCount: 0,
+              data: []
+            }
+          }
         })
       },
-      // custom table alert & rowSelection
       configFoodColumns: [
         {
           title: '配餐',
-          dataIndex: 'no'
+          dataIndex: 'id'
         },
         {
           title: '早餐',
-          dataIndex: 'breakfast',
-          scopedSlots: { customRender: 'breakfast' }
+          dataIndex: 'Breakfast',
+          customRender: val => {
+            return this.splitStr(val, 'Breakfast')
+          }
         },
         {
           title: '午餐',
-          dataIndex: 'lunch',
-          sorter: true,
-          needTotal: true,
-          scopedSlots: { customerGender: 'lunch' }
+          dataIndex: 'Lunch',
+          customRender: val => {
+            return this.splitStr(val, 'Lunch')
+          }
         },
         {
           title: '晚餐',
-          dataIndex: 'dinner',
-          scopedSlots: { customRender: 'dinner' }
+          dataIndex: 'Dinner',
+          customRender: val => {
+            return this.splitStr(val, 'Dinner')
+          }
         },
         {
           title: '配餐人',
-          dataIndex: 'operator',
-          scopedSlots: { customRender: 'operator' }
+          dataIndex: 'supporterName'
         },
         {
           title: '配餐状态',
-          dataIndex: 'historyStatus',
-          scopedSlots: { customRender: 'historyStatus' }
+          dataIndex: 'statusDescription'
         },
         {
           title: '日期',
-          dataIndex: 'date',
-          scopedSlots: { customRender: 'date' }
+          dataIndex: 'latOperateTime',
+          scopedSlots: { customRender: 'latOperateTime' },
+          render: this.formatter
         },
         {
           title: '操作',
@@ -574,46 +651,19 @@ export default {
           scopedSlots: { customRender: 'action' }
         }
       ],
-      lineData: [
-        { year: '1991', value: 3 },
-        { year: '1992', value: 4 },
-        { year: '1993', value: 3.5 },
-        { year: '1994', value: 5 },
-        { year: '1995', value: 4.9 },
-        { year: '1996', value: 6 },
-        { year: '1997', value: 7 },
-        { year: '1998', value: 9 },
-        { year: '1999', value: 13 }
-      ],
       teams: [],
-      axisData: [
-        { item: '阳虚质', a: 70, b: 30, c: 40 },
-        { item: '阴虚质', a: 60, b: 70, c: 40 },
-        { item: '痰湿质', a: 50, b: 60, c: 40 },
-        { item: '气虚质', a: 40, b: 50, c: 40 },
-        { item: '湿热质', a: 60, b: 70, c: 40 },
-        { item: '血瘀质', a: 70, b: 50, c: 40 },
-        { item: '气郁质', a: 70, b: 50, c: 40 },
-        { item: '特禀质', a: 70, b: 50, c: 40 },
-        { item: '平和质', a: 70, b: 50, c: 40 }
-      ],
       radarLoading: true,
       radarData: [],
       user: {},
       timeFix: timeFix(),
       loading: true,
       rankList,
-
       // 搜索用户数
       searchUserData,
       searchUserScale,
-      searchTableColumns,
       searchData,
-
       barData,
       barData2,
-
-      //
       pieScale,
       pieData,
       sourceData,
@@ -640,21 +690,173 @@ export default {
     }
   },
   methods: {
-    getCurrent(step) {
-      this.ConfigFoodStep = step
+    setActiveKey(key) {
+      this.activeKey = key
     },
-    handleEdit(id) {
+    getDate(date, dateString) {
+      this.dingDate = dateString
+    },
+    getData() {
+      return parameter => {
+        const params = { pageIndex: parameter.pageNo, pageSize: parameter.pageSize, oid: this.$route.params.id }
+        return getDietList(params).then(res => {
+          if (res.success) {
+            let temp = {}
+            Object.assign(temp, res.response)
+            for (let i = 0; i < temp.dietList.data.length; i++) {
+              let diets = JSON.parse(temp.dietList.data[i].currentDiet).mealList
+              temp.dietList.data[i].latOperateTime = moment(temp.dietList.data[i].latOperateTime).format(
+                // 日期转化
+                'YYYY-MM-DD HH:mm:ss'
+              )
+              for (let j = 0; j < diets.length; j++) {
+                temp.dietList.data[i][diets[j].name] = diets[j].food
+              }
+            }
+            return res.response.dietList
+          } else {
+            return {
+              pageIndex: 1,
+              pageSize: 10,
+              dataCount: 0,
+              pageCount: 0,
+              data: []
+            }
+          }
+        })
+      }
+    },
+    splitStr(val, type) {
+      console.log('va', val)
+      let strArr = val.split('}')
+      let temp = []
+      for (let i = 0; i < strArr.length - 1; i++) {
+        strArr[i] += '}'
+        if (strArr[i].charAt(0) === ',') {
+          strArr[i] = strArr[i].substr(1)
+        }
+        temp.push(JSON.parse(strArr[i]))
+      }
+      let resStr = ''
+      for (let i = 0; i < temp.length; i++) {
+        switch (type) {
+          case 'Breakfast':
+            resStr += temp[i].Breakfast + ','
+            break
+          case 'Lunch':
+            resStr += temp[i].Lunch + ','
+            break
+          case 'Dinner':
+            resStr += temp[i].Dinner + ','
+            break
+          default:
+            break
+        }
+      }
+      return resStr.substring(0, resStr.length - 1)
+    },
+    getKey(val) {
+      switch (val) {
+        case 'id':
+          return 'id'
+          break
+        case '请输入您的身高（CM）':
+          return 'height'
+          break
+        case '请输入今日体重（KG）':
+          return 'weight'
+          break
+        case '请输入您的年龄':
+          return 'age'
+          break
+        case '排便后称重':
+          return 'isDefecate'
+          break
+        case '昨日早餐':
+          return 'yesterdayBreakfirst'
+          break
+        case '昨日午餐':
+          return 'yesterdayLunch'
+          break
+        case '午餐拍照':
+          return 'lunchImg'
+          break
+        case '昨日晚餐':
+          return 'yesterdayDinner'
+          break
+        case '有加餐吗？':
+          return 'isNightSnack'
+          break
+        case '加餐内容':
+          return 'nightSnack'
+          break
+        case '入睡时间':
+          return 'sleepTime'
+          break
+        case '饮水量（ML）':
+          return 'water'
+          break
+        case '喝了多少颗小红杯':
+          return 'cup'
+          break
+        default:
+      }
+    },
+    getCurrent(step) {
+      this.resParams = step.resParams
+      this.ConfigFoodStep = step.stepData
+    },
+    handleEdit(param) {
+      param.type == 1 ? (this.title = '删除配餐记录') : (this.title = '删除打卡记录')
       this.$refs.confirm.showModal()
     },
-    deleteRow(id) {
-      console.log('确认删除')
-      this.$refs.confirm.hideModal()
+    deleteRow(data) {
+      console.log('确认删除', data)
+      deleteDing({ firstAnswerGuid: data.firstAnswerGuid }).then(res => {
+        console.log('删除打卡', res)
+        if (res.success) {
+          setTimeout(() => {
+            this.$notification.success({
+              message: res.message
+            })
+            this.$router.go(0)
+          }, 1000)
+        } else {
+          this.$notification['error']({
+            message: '错误:',
+            description: res.message + res.response,
+            duration: 4
+          })
+        }
+      })
+      this.isShow = false
     },
     openInvalidModal(rowData) {
       this.$refs.modal.openModal(rowData)
     },
-    handleOk(values) {
-      console.log('保存数据？？？？', values)
+    handleOk(params) {
+      let param = {
+        oid: params.id,
+        discardReason: params.cause,
+        lastOperateOid: this.$store.state.userInfo.oid,
+        dislikeList: params.dislike
+      }
+      deleteDiet(param).then(res => {
+        if (res.success) {
+          setTimeout(() => {
+            this.$notification.success({
+              message: res.message
+            })
+            this.$router.go(0)
+          }, 1000)
+        } else {
+          this.$notification['error']({
+            message: '错误:',
+            description: res.message + res.response,
+            duration: 4
+          })
+        }
+      })
       this.$refs.modal.closeModal()
     },
     beforeUpload(file) {
@@ -665,6 +867,7 @@ export default {
       reader.onload = () => {
         this.options.img = reader.result
         console.log('快来看', this.options.img)
+        this.uploadList.push(encodeURIComponent(this.options.img))
       }
 
       // 转化为blob
@@ -672,34 +875,194 @@ export default {
 
       return false
     },
+    setParams(values, imgArr) {
+      console.log('图片呢?', imgArr)
+
+      let resArr = []
+      const guid = {
+        heightGuid: 'B180EAC0-127D-4ECB-BDB6-C2599D310BD4',
+        weigtGuid: 'A9F3D741-A83D-40E9-A108-89F7FC743384',
+        ageGuid: '39D4C746-53FC-44A9-8C93-4FF5AC2992B9',
+        isToiletGuid: 'BC66AA2E-39E7-4725-BBB3-B32647D647A7',
+        breakfast: '0C5AE0D5-79E4-4B3F-BCEA-AB829B10B8B9',
+        lunch: '70E6739C-D888-4F40-9327-116AED7BFF83',
+        file: 'B4C843BC-9EDF-4DD9-9119-B90CA0F0612B',
+        dinner: '47522713-0697-443E-8799-48255AEF4AE4',
+        isExtraFood: '7E074CB7-0C50-485C-8B9F-8C7FD0456CA0',
+        extraFood: 'F5E6D750-1C45-4D73-AD0C-65A04BDAA212',
+        sleepTime: '79704935-D89B-4469-AAA6-6D9039A21DF9',
+        water: '83246766-A71C-4ABA-8770-8C761BBD0390',
+        number: '99E3373A-6886-47CC-8364-94031A69EF42',
+        Conclusion: 'E3159227-6EC9-49C4-B22E-CC77E5256636'
+      }
+
+      for (let key in values) {
+        switch (key) {
+          case 'weight':
+            resArr.push({ questionOID: guid.weigtGuid, answerContent: values[key] })
+            break
+          case 'height':
+            resArr.push({ questionOID: guid.heightGuid, answerContent: values[key] })
+            break
+          case 'breakfast':
+            resArr.push({ questionOID: guid.breakfast, answerContent: values[key] })
+            break
+          case 'lunch':
+            resArr.push({ questionOID: guid.lunch, answerContent: values[key] })
+            break
+          case 'file':
+            resArr.push({
+              questionOID: guid.file,
+              answerContent: JSON.stringify(imgArr)
+            })
+            break
+          case 'dinner':
+            resArr.push({ questionOID: guid.dinner, answerContent: values[key] })
+            break
+          case 'sleepTime':
+            resArr.push({ questionOID: guid.sleepTime, answerContent: values[key] })
+            break
+          case 'water':
+            resArr.push({ questionOID: guid.water, answerContent: values[key] })
+            break
+          case 'number':
+            resArr.push({ questionOID: guid.number, answerContent: values[key] })
+            break
+        }
+      }
+      resArr.push({ questionOID: guid.Conclusion, answerContent: '知道了' })
+      resArr.push({
+        questionOID: guid.isExtraFood,
+        answerContent: this.extraFood === 1 ? '否' : '是'
+      })
+      this.isExtraFood != 1
+        ? resArr.push({
+            questionOID: guid.extraFood,
+            answerContent: values.extraFood
+          })
+        : ''
+      resArr.push({ questionOID: guid.isToiletGuid, answerContent: this.toilet === 1 ? '是' : '否' })
+      let param = {
+        customerOid: this.$route.params.id,
+        supporterOid: this.$store.state.userInfo.oid,
+        AssistDate: this.dingDate,
+        assistDing: resArr
+      }
+
+      console.log('确认参数', param)
+      ding(JSON.stringify(param)).then(res => {
+        console.log('上传结果', res)
+        if (res.success) {
+          setTimeout(() => {
+            this.$notification.success({
+              message: res.message
+            })
+            this.$router.go(0)
+          }, 1000)
+        }
+      })
+    },
     handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          // eslint-disable-next-line no-console
-          console.log('Received values of form: ', values)
+          dingImg(JSON.stringify({ Base64Pic: this.uploadList })).then(res => {
+            let imgArr = []
+            if (res.success) {
+              imgArr.push(res.response.dingPicList[0].remoteOid)
+              setTimeout(() => {
+                this.$notification.success({
+                  message: res.message
+                })
+              }, 1000)
+              this.setParams(values, imgArr)
+            }
+          })
         }
       })
     },
     initRadar() {
-      this.radarLoading = true
-      this.$http.get('/workplace/radar').then(res => {
-        console.log('what', res.result)
-
-        const dv = new DataSet.View().source(res.result)
-        dv.transform({
-          type: 'fold',
-          fields: ['阳虚质', '阴虚质', '痰湿质', '气虚质', '湿热质', '血瘀质', '气郁质', '特禀质', '平和质'],
-          key: 'user',
-          value: 'score'
-        })
-        this.radarData = dv.rows
-        this.radarLoading = false
+      const dv = new DataSet.View().source(this.mecumery)
+      dv.transform({
+        type: 'fold',
+        fields: [
+          '阳虚质',
+          '阴虚质',
+          '痰湿质',
+          '气虚质',
+          '湿热质',
+          '血瘀质',
+          '气郁质',
+          '特禀质',
+          '平和质',
+          '倾向阳虚质',
+          '倾向阴虚质',
+          '倾向痰湿质',
+          '倾向气虚质',
+          '倾向湿热质',
+          '倾向血瘀质',
+          '倾向气郁质',
+          '倾向特禀质',
+          '倾向平和质'
+        ],
+        key: 'user',
+        value: 'score'
       })
+      this.radarData = dv.rows
     }
   },
   mounted() {
-    this.initRadar()
+    getUserInfo(this.$route.params.id).then(res => {
+      console.log('多出了字段', res.response)
+
+      res.success ? (this.usertails = res.response) : ''
+    })
+    getBMI(this.$route.params.id).then(res => {
+      let temp = res.response.bmiList
+      let resArr = []
+      if (res.success) {
+        for (let i = 0; i < temp.length; i++) {
+          let tempObj = {}
+          tempObj.year = moment(temp[i].recordTime).format('YYYYMMDD')
+          tempObj.value = temp[i].bmi
+          resArr.push(tempObj)
+        }
+        this.bmi = resArr
+      }
+    })
+    getMecumery(this.$route.params.id).then(res => {
+      // this.radarLoading = true
+
+      if (res.success) {
+        let temp = []
+        let data = res.response.customerPhysique.physique
+        for (let i = 0; i < data.length; i++) {
+          let obj = {}
+          obj.item = data[i].title
+          obj[data[i].title] = parseFloat(parseFloat(data[i].currentCent).toFixed(2))
+          temp.push(obj)
+        }
+        this.mecumery = temp
+
+        this.initRadar()
+      }
+      // this.radarLoading = false
+    })
+    getWeight(this.$route.params.id).then(res => {
+      let temp = res.response.weightList
+      let resArr = []
+      if (res.success) {
+        for (let i = 0; i < temp.length; i++) {
+          let tempObj = {}
+          tempObj.year = moment(temp[i].recordTime).format('YYYYMMDD')
+          tempObj.value = temp[i].weight
+          resArr.push(tempObj)
+        }
+        this.weight = resArr
+      }
+
+      console.log('拿到体重列表', this.weight)
+    })
   },
   created() {
     this.user = this.userInfo

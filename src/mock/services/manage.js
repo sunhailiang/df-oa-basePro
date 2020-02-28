@@ -45,7 +45,7 @@ const recommendRandom = options => {
       { key: 7, foodName: '玉米', foodWeight: '320g', nutrient: { C: 9, F: 3, P: 2 } }
     ]
   })
-
+  // [{type:'',data:[]},{type:'',data:[]}]
   return result
 }
 

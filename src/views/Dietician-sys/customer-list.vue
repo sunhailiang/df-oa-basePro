@@ -4,51 +4,40 @@
       <a-form layout="inline">
         <a-row :gutter="48">
           <a-col :md="8" :sm="24">
-            <a-form-item label="编号">
-              <a-input v-model="queryParam.id" placeholder />
+            <a-form-item label="姓名">
+              <a-input v-model="queryParam.customerName" placeholder />
             </a-form-item>
           </a-col>
           <a-col :md="8" :sm="24">
-            <a-form-item label="性别g">
-              <a-select v-model="queryParam.gender" placeholder="请选择" default-value="0">
-                <a-select-option value="0">女</a-select-option>
-                <a-select-option value="1">男</a-select-option>
-              </a-select>
+            <a-form-item label="手机">
+              <a-input v-model="queryParam.cellphone" placeholder />
             </a-form-item>
           </a-col>
           <template v-if="advanced">
             <a-col :md="8" :sm="24">
-              <a-form-item label="年龄">
-                <a-input-number v-model="queryParam.age" style="width: 100%" />
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="地区" >
-                <a-date-picker
-                  id="dp"
-                  v-model="queryParam.area"
-                  style="width: 100%;"
-                  placeholder="请输入更新日期"
-                  @openChange="handlePanelChange"
-                  ref="currentDate"
-                >
-                </a-date-picker>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="类别">
-                <a-select v-model="queryParam.type" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">控糖</a-select-option>
-                  <a-select-option value="1">减肥</a-select-option>
+              <a-form-item label="服务类别">
+                <a-select v-model="queryParam.serviceOid" placeholder="请选择" default-value="0">
+                  <a-select-option v-for="item in serviceType" :key="item.oid" :value="item.oid">
+                    {{ item.name }}
+                  </a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item label="归属客服">
-                <a-select v-model="queryParam.service" placeholder="请选择" default-value="0">
-                  <a-select-option value="0">张三</a-select-option>
-                  <a-select-option value="1">李四</a-select-option>
-                  <a-select-option value="2">王五</a-select-option>
+                <a-select v-model="queryParam.supporterOid" placeholder="请选择" default-value="0">
+                  <a-select-option v-for="item in supporterList" :value="item.oid" :key="item.oid">
+                    {{ item.userName }}
+                  </a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :md="8" :sm="24">
+              <a-form-item label="归属代理">
+                <a-select v-model="queryParam.agenterOid" placeholder="请选择" default-value="0">
+                  <a-select-option v-for="item in agenterList" :key="item.oid" :value="item.oid">
+                    {{ item.userName }}
+                  </a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
@@ -58,7 +47,7 @@
               class="table-page-search-submitButtons"
               :style="(advanced && { float: 'right', overflow: 'hidden' }) || {}"
             >
-              <a-button type="primary" @click="$refs.table.refresh(true)">查询</a-button>
+              <a-button type="primary" @click="loadDataCondition">查询</a-button>
               <a-button style="margin-left: 8px" @click="() => (queryParam = {})">重置</a-button>
               <a @click="toggleAdvanced" style="margin-left: 8px">
                 {{ advanced ? '收起' : '展开' }}
@@ -76,7 +65,7 @@
     <s-table
       ref="table"
       size="default"
-      rowKey="key"
+      rowKey="id"
       :columns="columns"
       :data="loadData"
       :alert="options.alert"
@@ -94,7 +83,7 @@
 
       <span slot="action" slot-scope="text, record">
         <template>
-          <a @click="handleEdit(record.no)">详情</a>
+          <a @click="handleEdit(record.oid)">详情</a>
         </template>
       </span>
     </s-table>
@@ -108,7 +97,14 @@ import { Ellipsis } from '@/components'
 import STable from './components/table/CustomerList'
 import AddCustomerModal from './components/modal/AddCustomerModal'
 import CreateForm from './modules/CreateForm'
-import { getRoleList, getServiceList } from '@/api/manage'
+import {
+  getServiceList,
+  getServiceListCondition,
+  addCustomer,
+  agenterList,
+  supporterList,
+  serviceList
+} from '@/api/manage'
 
 const statusMap = {
   0: {
@@ -132,6 +128,25 @@ export default {
 
   data() {
     return {
+      agenterList: [],
+      supporterList: [],
+      serviceType: [],
+      // 新增用户
+      userInfo: {
+        oid: '',
+        userName: '',
+        sex: 0,
+        age: 0,
+        province: '',
+        city: '',
+        initHeight: 0,
+        initWeight: 0,
+        supporterOid: '',
+        jobName: '',
+        jobStrength: '',
+        serviceOid: '',
+        agenterOid: ''
+      },
       mdl: {},
       // 高级搜索 展开/关闭
       advanced: false,
@@ -141,39 +156,34 @@ export default {
       columns: [
         {
           title: '客户编号',
-          dataIndex: 'no'
+          dataIndex: 'oid'
         },
         {
           title: '姓名',
-          dataIndex: 'customerName',
-          scopedSlots: { customRender: 'customerName' }
+          dataIndex: 'userName'
         },
         {
           title: '性别',
-          dataIndex: 'customerGender',
-          sorter: true,
-          // needTotal: true, // 不需要统计
-          scopedSlots: { customerGender: 'customerGender' }
+          dataIndex: 'sex',
+          customRender: val => {
+            return val == 1 ? '男' : '女'
+          }
         },
         {
           title: '年龄',
-          dataIndex: 'customerAge',
-          scopedSlots: { customRender: 'customerAge' }
+          dataIndex: 'age'
         },
         {
           title: '地区',
-          dataIndex: 'customerArea',
-          sorter: true
+          dataIndex: 'city'
         },
         {
           title: '类别',
-          dataIndex: 'customerCategory',
-          sorter: true
+          dataIndex: 'serviceName'
         },
         {
           title: '归属客服',
-          dataIndex: 'affiliation',
-          sorter: true
+          dataIndex: 'supporterName'
         },
         {
           title: '操作',
@@ -184,9 +194,18 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log('loadData.parameter', parameter)
         return getServiceList(Object.assign(parameter, this.queryParam)).then(res => {
-          return res.result
+          if (res.response !== null) {
+            return res.response.customerList
+          } else {
+            return {
+              pageIndex: 1,
+              pageSize: 10,
+              dataCount: 0,
+              pageCount: 0,
+              data: []
+            }
+          }
         })
       },
       selectedRowKeys: [],
@@ -222,22 +241,74 @@ export default {
       return statusMap[type].status
     }
   },
-  created() {
-    getRoleList({ t: new Date() })
+  mounted() {
+    agenterList().then(res => {
+      res.response != 'null' ? (this.agenterList = res.response) : ''
+    })
+    supporterList().then(res => {
+      res.response != 'null' ? (this.supporterList = res.response) : ''
+    })
+    serviceList().then(res => {
+      res.response != 'null' ? (this.serviceType = res.response) : ''
+    })
   },
-
   methods: {
+    loadDataCondition() {
+      this.loadData = parameter => {
+        return getServiceListCondition(Object.assign(parameter, this.queryParam)).then(res => {
+          if (res.response) {
+            return res.response.customerList
+          } else {
+            return {
+              pageIndex: 1,
+              pageSize: 10,
+              dataCount: 0,
+              pageCount: 0,
+              data: []
+            }
+          }
+        })
+      }
+    },
     getDom(el) {
       console.log('el', el)
     },
     handlePanelChange(isShow) {
       if (isShow) {
-        console.log('找找看吧,', this.$refs.currentDate.$children)
         setTimeout(console.log(document.getElementsByClassName('ant-calendar-input-wrap')[0]), 2000)
       }
     },
     saveUser(values) {
-      console.log('保存新用户啊', values)
+      this.userInfo.oid = values.oid
+      this.userInfo.userName = values.userName
+      this.userInfo.sex = parseInt(values.sex)
+      this.userInfo.age = parseInt(values.age)
+      this.userInfo.province = values.province == null ? '' : values.province
+      this.userInfo.city = values.city
+      this.userInfo.initHeight = parseFloat(values.initHeight)
+      this.userInfo.initWeight = parseFloat(values.initWeight)
+      this.userInfo.supporterOid = values.service
+      this.userInfo.jobName = values.job
+      this.userInfo.jobStrength = values.jobStrength
+      this.userInfo.serviceOid = values.type
+      this.userInfo.agenterOid = values.agency
+      addCustomer(this.userInfo).then(res => {
+        if (res.success) {
+          setTimeout(() => {
+            this.$notification.success({
+              message: '新增成功'
+            })
+          }, 1500)
+          this.loadDataCondition()
+          this.$refs.addUserModal.closeModal()
+        } else {
+          this.$notification['error']({
+            message: '错误',
+            description: res.message + ':' + res.response,
+            duration: 4
+          })
+        }
+      })
     },
     CreateUser(id) {
       this.$refs.addUserModal.openModal()

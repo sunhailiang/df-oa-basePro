@@ -82,13 +82,25 @@ export default {
     }
   }),
   watch: {
+    data(val) {
+      console.log('可以重新执行么？', val)
+      this.data = val
+      this.localPagination = Object.assign(
+        {},
+        {
+          current: 1,
+          pageSize: this.pageSize
+        }
+      )
+      this.loadData()
+    },
     'localPagination.current'(val) {
       this.pageURI &&
         this.$router.push({
           ...this.$route,
           name: this.$route.name,
           params: Object.assign({}, this.$route.params, {
-            pageNo: val
+            pageIndex: val
           })
         })
     },
@@ -109,8 +121,8 @@ export default {
     }
   },
   created() {
-    const { pageNo } = this.$route.params
-    const localPageNum = (this.pageURI && pageNo && parseInt(pageNo)) || this.pageNum
+    const { pageIndex } = this.$route.params
+    const localPageNum = (this.pageURI && pageIndex && parseInt(pageIndex)) || this.pageNum
     this.localPagination =
       (['auto', true].includes(this.showPagination) &&
         Object.assign({}, this.localPagination, {
@@ -150,7 +162,7 @@ export default {
       this.localLoading = true
       const parameter = Object.assign(
         {
-          pageNo:
+          pageIndex:
             (pagination && pagination.current) || (this.showPagination && this.localPagination.current) || this.pageNum,
           pageSize:
             (pagination && pagination.pageSize) ||
@@ -180,12 +192,14 @@ export default {
           this.localPagination =
             (this.showPagination &&
               Object.assign({}, this.localPagination, {
-                current: r.pageNo, // 返回结果中的当前分页数
-                total: r.totalCount, // 返回结果中的总记录数
+                current: r.pageIndex, // 返回结果中的当前分页数
+                total: r.dataCount, // 返回结果中的总记录数
                 showSizeChanger: this.showSizeChanger,
                 pageSize: (pagination && pagination.pageSize) || this.localPagination.pageSize
               })) ||
             false
+          console.log('吃火锅', r)
+
           // 为防止删除数据后导致页面当前页面数据长度为 0 ,自动翻页到上一页
           if (r.data.length === 0 && this.showPagination && this.localPagination.current > 1) {
             this.localPagination.current--
@@ -198,7 +212,7 @@ export default {
           try {
             if (
               ['auto', true].includes(this.showPagination) &&
-              r.totalCount <= r.pageNo * this.localPagination.pageSize
+              r.dataCount <= r.pageIndex * this.localPagination.pageSize
             ) {
               this.localPagination.hideOnSinglePage = true
             }

@@ -20,13 +20,11 @@ export default new Vuex.Store({
     permission
   },
   state: {
-
+    userInfo: {},
+    editWeight: [],
+    activeKey: '1'
   },
-  mutations: {
-
-  },
-  actions: {
-
-  },
+  mutations: {},
+  actions: {},
   getters
 })

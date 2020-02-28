@@ -12,15 +12,17 @@ import { axios } from '@/utils/request'
  * @param parameter
  * @returns {*}
  */
-export function login (parameter) {
+export function login(parameter) {
+  console.log('惺惺惜惺惺', api.Login)
+
   return axios({
-    url: '/auth/login',
+    url: api.Login,
     method: 'post',
     data: parameter
   })
 }
 
-export function getSmsCaptcha (parameter) {
+export function getSmsCaptcha(parameter) {
   return axios({
     url: api.SendSms,
     method: 'post',
@@ -28,7 +30,7 @@ export function getSmsCaptcha (parameter) {
   })
 }
 
-export function getInfo () {
+export function getInfo() {
   return axios({
     url: '/user/info',
     method: 'get',
@@ -38,20 +40,10 @@ export function getInfo () {
   })
 }
 
-export function getCurrentUserNav (token) {
+export function getCurrentUserNav(token) {
   return axios({
     url: '/user/nav',
     method: 'get'
-  })
-}
-
-export function logout () {
-  return axios({
-    url: '/auth/logout',
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
   })
 }
 
@@ -59,7 +51,7 @@ export function logout () {
  * get user 2step code open?
  * @param parameter {*}
  */
-export function get2step (parameter) {
+export function get2step(parameter) {
   return axios({
     url: api.twoStepCode,
     method: 'post',

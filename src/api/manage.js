@@ -1,37 +1,222 @@
 import { axios } from '@/utils/request'
+import get from 'lodash.get'
 
 const api = {
   user: '/user',
   role: '/role',
-  service: '/service',
+  service: '/CustomerList', // 客户列表
+  serviceCondition: '/CustomerList/Condition', // 条件检索
+  originalCustomer: '/Customer/OriginalCustomer/', // 检索指定客户
+  agenterList: '/AgenterList', // 代理列表
+  supporterList: '/SupporterList', // 客服列表
+  serviceList: '/ServiceList', // 服务列表
+  customer: '/Customer/', // 获取客户信息+/{oid}
+  bmi: '/Customer/BMIList/', // {oid} 获取用户的bmi
+  mecumery: '/Customer/Physique/', //{oid} 获取用户的体质结果
+  weight: '/Customer/WeightList/', //{oid} 获取用户体重
+  dinglist: '/DingList/', //{oid} 获取打卡列表
+  ding: '/Ding', //打卡
+  dingImg: '/Ding/UploadBase64/Pic', // 上传打卡图片
+  dietlist: '/DietList/', //{Oid} 食谱列表
+  dailyEnergy: '/Customer/DailyEnergy/', // 获取配餐当前总能量
+  componentPercentage: '/CompoundFood/ComponentPercentage', // 获取三大营养素比例
+  dailyFoodComponent: '/CompoundFood/DailyFoodComponent/', // 推荐九宫格数据
+  compoundFood: '/CompoundFood/Recommend/', // 获取推荐食材
+  addDiet: '/Diet', // 新增配餐记录
+  deleteDiet: '/Diet/Delete', // 删除一条配餐记录
+  deleteDing: '/Ding/Delete', // 删除一条打卡记录
   permission: '/permission',
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
-  deployhistory: '/deployhistory',
-  cardhistory: '/cardhistory',
-  recommendrandom: '/recommendrandom'
+  cardhistory: '/cardhistory'
+  // recommendrandom: '/recommendrandom'
 }
 
 export default api
-export function getRecommendRandom(parameter) {
+
+export function deleteDing(parameter) {
+  // 删除打卡记录
   return axios({
-    url: api.recommendrandom,
+    url: api.deleteDing,
+    method: 'post',
+    data: parameter
+  })
+}
+export function deleteDiet(parameter) {
+  // 删除配餐记录
+  return axios({
+    url: api.deleteDiet,
+    method: 'post',
+    data: parameter
+  })
+}
+export function ding(parameter) {
+  // 代理打卡
+  return axios({
+    url: api.ding,
+    method: 'post',
+    data: parameter
+  })
+}
+export function dingImg(parameter) {
+  // 上传图片
+  return axios({
+    url: api.dingImg,
+    method: 'post',
+    data: parameter,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
+  })
+}
+export function addDiet(parameter) {
+  // 添加配餐
+  return axios({
+    url: api.addDiet,
+    method: 'post',
+    data: JSON.stringify(parameter)
+  })
+}
+export function getcompoundFood(parameter) {
+  return axios({
+    url: api.compoundFood + parameter.oid + '/' + parameter.NameCode + '/' + parameter.componentValue,
+    methods: 'get'
+  })
+}
+export function getdailyFoodComponent(parameter) {
+  return axios({
+    url: api.dailyFoodComponent + parameter.dailyEnergy,
+    methods: 'get',
+    params: { pValue: parameter.pValue, fValue: parameter.fValue, cValue: parameter.cValue }
+  })
+}
+export function getComponentPercentage(parameter) {
+  return axios({
+    url: api.componentPercentage,
+    methods: 'get'
+  })
+}
+export function getDailyEnergy(parameter) {
+  // 获取配餐总能量
+  return axios({
+    url: api.dailyEnergy + parameter,
+    method: 'get'
+  })
+}
+export function getUserInfo(parameter) {
+  //获取客户信息
+  return axios({
+    url: api.customer + parameter,
+    method: 'get'
+  })
+}
+export function getBMI(parameter) {
+  //获取用户的bmi
+  return axios({
+    url: api.bmi + parameter,
+    method: 'get'
+  })
+}
+export function getMecumery(parameter) {
+  //获取用户的体质结果
+  return axios({
+    url: api.mecumery + parameter,
+    method: 'get'
+  })
+}
+export function getWeight(parameter) {
+  //获取用户体重列表
+  return axios({
+    url: api.weight + parameter,
+    method: 'get'
+  })
+}
+export function getDingList(parameter) {
+  // 获取打卡列表
+  return axios({
+    url: api.dinglist + parameter.oid,
+    method: 'get',
+    params: { pageIndex: parameter.pageIndex, pageSize: parameter.pageSize }
+  })
+}
+export function getDietList(parameter) {
+  // 配餐列表
+  return axios({
+    url: api.dietlist + parameter.oid,
+    method: 'get',
+    params: { pageIndex: parameter.pageIndex, pageSize: parameter.pageSize }
+  })
+}
+export function addCustomer(parameter) {
+  // 新增用户
+  return axios({
+    url: api.customer,
+    method: 'post',
+    data: JSON.stringify(parameter)
+  })
+}
+export function getCustomer(parameter) {
+  // 查询客户
+  return axios({
+    url: api.customer + '/' + params,
+    method: 'get'
+  })
+}
+export function agenterList() {
+  //代理列表
+  return axios({
+    url: api.agenterList,
+    method: 'get'
+  })
+}
+export function supporterList() {
+  //客服列表
+  return axios({
+    url: api.supporterList,
+    method: 'get'
+  })
+}
+export function serviceList() {
+  //服务列表
+  return axios({
+    url: api.serviceList,
+    method: 'get'
+  })
+}
+export function getServiceList(parameter) {
+  //获取用户列表
+  return axios({
+    url: api.service,
     method: 'get',
     params: parameter
   })
 }
+export function getServiceListCondition(parameter) {
+  // 筛选用户列表
+  return axios({
+    url: api.serviceCondition,
+    method: 'get',
+    params: parameter
+  })
+}
+export function originalCustomer(parameter) {
+  // 筛选指定客户
+  return axios({
+    url: api.originalCustomer + parameter,
+    method: 'get'
+  })
+}
+// export function getRecommendRandom(parameter) {
+//   return axios({
+//     url: api.recommendrandom,
+//     method: 'get',
+//     params: parameter
+//   })
+// }
 
 export function getUserList(parameter) {
   return axios({
     url: api.user,
-    method: 'get',
-    params: parameter
-  })
-}
-
-export function getDeployHistory(parameter) {
-  return axios({
-    url: api.deployhistory,
     method: 'get',
     params: parameter
   })
@@ -48,14 +233,6 @@ export function getCardHistory(parameter) {
 export function getRoleList(parameter) {
   return axios({
     url: api.role,
-    method: 'get',
-    params: parameter
-  })
-}
-
-export function getServiceList(parameter) {
-  return axios({
-    url: api.service,
     method: 'get',
     params: parameter
   })

@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const createThemeColorReplacerPlugin = require('./config/plugin.config')
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
@@ -38,9 +38,8 @@ const vueConfig = {
     externals: isProd ? assetsCDN.externals : {}
   },
 
-  chainWebpack: (config) => {
-    config.resolve.alias
-      .set('@$', resolve('src'))
+  chainWebpack: config => {
+    config.resolve.alias.set('@$', resolve('src'))
 
     const svgRule = config.module.rule('svg')
     svgRule.uses.clear()
@@ -73,7 +72,6 @@ const vueConfig = {
       less: {
         modifyVars: {
           // less vars，customize ant design theme
-
           // 'primary-color': '#F5222D',
           // 'link-color': '#F5222D',
           // 'border-radius-base': '4px'
@@ -88,11 +86,14 @@ const vueConfig = {
     // development server port 8000
     port: 8000
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
+    // proxy: 'http://192.168.1.108:5000'
     // proxy: {
     //   '/api': {
-    //     target: 'https://mock.ihx.me/mock/5baf3052f7da7e07e04a5116/antd-pro',
-    //     ws: false,
-    //     changeOrigin: true
+    //     target: 'http://192.168.1.108:5000/api',
+    //     changeOrigin: true,
+    //     pathRewrite: {
+    //       '^/api': '/api'
+    //     }
     //   }
     // }
   },

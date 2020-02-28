@@ -1,7 +1,7 @@
 <template>
   <a-locale-provider :locale="locale">
     <div id="app">
-      <router-view/>
+      <router-view />
     </div>
   </a-locale-provider>
 </template>
@@ -12,18 +12,24 @@ import { AppDeviceEnquire } from '@/utils/mixin'
 
 export default {
   mixins: [AppDeviceEnquire],
-  data () {
+  data() {
     return {
       locale: zhCN
     }
   },
-  mounted () {
-
+  mounted() {},
+  created() {
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('userInfo', JSON.stringify(this.$store.state))
+    })
+    if (sessionStorage.getItem('userInfo')) {
+      this.$store.replaceState(Object.assign({}, this.$store.state, JSON.parse(sessionStorage.getItem('userInfo'))))
+    }
   }
 }
 </script>
 <style>
-  #app {
-    height: 100%;
-  }
+#app {
+  height: 100%;
+}
 </style>

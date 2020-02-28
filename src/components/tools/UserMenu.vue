@@ -1,38 +1,16 @@
 <template>
   <div class="user-wrapper">
     <div class="content-box">
-      <a href="https://pro.loacg.com/docs/getting-started" target="_blank">
-        <span class="action">
-          <a-icon type="question-circle-o"></a-icon>
-        </span>
-      </a>
-      <notice-icon class="action"/>
+      <notice-icon class="action" />
       <a-dropdown>
         <span class="action ant-dropdown-link user-dropdown-menu">
-          <a-avatar class="avatar" size="small" :src="avatar"/>
-          <span>{{ nickname }}</span>
+          <a-avatar class="avatar" size="small" :src="avata" />
+          <span class="user-name">营养师：{{ this.$store.state.userInfo.userName }}</span>
         </span>
         <a-menu slot="overlay" class="user-dropdown-menu-wrapper">
-          <a-menu-item key="0">
-            <router-link :to="{ name: 'center' }">
-              <a-icon type="user"/>
-              <span>个人中心</span>
-            </router-link>
-          </a-menu-item>
-          <a-menu-item key="1">
-            <router-link :to="{ name: 'settings' }">
-              <a-icon type="setting"/>
-              <span>账户设置</span>
-            </router-link>
-          </a-menu-item>
-          <a-menu-item key="2" disabled>
-            <a-icon type="setting"/>
-            <span>测试</span>
-          </a-menu-item>
-          <a-menu-divider/>
           <a-menu-item key="3">
             <a href="javascript:;" @click="handleLogout">
-              <a-icon type="logout"/>
+              <a-icon type="logout" />
               <span>退出登录</span>
             </a>
           </a-menu-item>
@@ -45,38 +23,47 @@
 <script>
 import NoticeIcon from '@/components/NoticeIcon'
 import { mapActions, mapGetters } from 'vuex'
-
+import store from '@/store'
 export default {
   name: 'UserMenu',
   components: {
     NoticeIcon
   },
+  data() {
+    return {
+      avata: 'https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png'
+    }
+  },
   computed: {
     ...mapGetters(['nickname', 'avatar'])
-
   },
   methods: {
     ...mapActions(['Logout']),
-    handleLogout () {
+    handleLogout() {
       this.$confirm({
         title: '提示',
         content: '真的要注销登录吗 ?',
         onOk: () => {
-          return this.Logout({}).then(() => {
-            setTimeout(() => {
-              window.location.reload()
-            }, 16)
-          }).catch(err => {
-            this.$message.error({
-              title: '错误',
-              description: err.message
-            })
+          store.dispatch('Logout').then(() => {
+            console.log('登出')
+
+            this.$router.push('/user/login')
           })
         },
-        onCancel () {
-        }
+        onCancel() {}
       })
     }
   }
 }
 </script>
+<style lang="less" scoped>
+.user-name {
+  display: inline-block;
+  padding-right: 14px;
+  font-size: 17px;
+}
+.avatar {
+  position: relative;
+  top: -4px;
+}
+</style>

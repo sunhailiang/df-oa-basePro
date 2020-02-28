@@ -1,7 +1,7 @@
 <template>
   <div>
-    <a-modal title="Modal" v-model="visible" @ok="hideModal" okText="确认" cancelText="取消">
-      <p>确认要删除数据吗？</p>
+    <a-modal :title="title" v-model="visible" @ok="hideModal" okText="确认" cancelText="取消">
+      <p>确认要删除这条{{ title }}吗？</p>
     </a-modal>
   </div>
 </template>
@@ -13,13 +13,22 @@ export default {
       visible: false
     }
   },
-
+  props: {
+    title: String,
+    isShow: Boolean
+  },
   methods: {
     showModal() {
       this.visible = true
     },
     hideModal() {
-      this.visible = false
+      this.$emit('doDelete', this.title)
+      this.visible = this.isShow
+    }
+  },
+  watch: {
+    isShow(val) {
+      !val ? (this.visible = val) : ''
     }
   }
 }

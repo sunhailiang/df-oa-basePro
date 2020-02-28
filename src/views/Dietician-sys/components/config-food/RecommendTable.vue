@@ -1,15 +1,18 @@
 <template>
-  <a-table :rowSelection="rowSelection" :pagination="false" :columns="columns" :dataSource="data"> </a-table>
+  <div>
+    <a-table :rowSelection="rowSelection" rowkey="oid" :pagination="false" :columns="columns" :dataSource="data">
+    </a-table>
+  </div>
 </template>
 <script>
 const columns = [
   {
     title: '食材名称',
-    dataIndex: 'foodName'
+    dataIndex: 'name'
   },
   {
     title: '食材重量',
-    dataIndex: 'foodWeight'
+    dataIndex: 'value'
   }
 ]
 
@@ -31,13 +34,14 @@ export default {
       default: 0
     }
   },
+  mounted() {},
   computed: {
     rowSelection() {
       const { selectedRowKeys } = this
       const tbType = this.tbType
       return {
         onChange: (selectedRowKeys, selectedRows) => {
-          console.log(`selectedRowKeys: ${selectedRowKeys}`, '瞅瞅人家拿到的数据: ', selectedRows)
+          // console.log(`selectedRowKeys: ${selectedRowKeys}`, '瞅瞅人家拿到的数据: ', selectedRows)
           this.$emit('getSelected', { tbType, selectedRows })
         }
       }

@@ -66,21 +66,21 @@ export const asyncRouterMap = [
         redirect: '/dietician/customer/list',
         hideChildrenInMenu: false,
         component: RouteView,
-        meta: { title: '营养师工作台', keepAlive: true, icon: bxAnaalyse, permission: ['dashboard'] },
+        meta: { title: '营养师工作台', keepAlive: true, icon: bxAnaalyse },
         children: [
           {
             path: '/dietician/customer/list',
             name: 'TableListWrapper',
             hideChildrenInMenu: true, // 强制显示 MenuItem 而不是 SubMenu
             component: () => import('@/views/Dietician-sys/customer-list.vue'),
-            meta: { title: '客户列表', keepAlive: true, permission: ['table'] }
+            meta: { title: '客户列表', keepAlive: true }
           },
           {
             hidden: 'false',
             path: '/customer/detail/:id',
             name: 'Analysis',
             component: () => import('@/views/Dietician-sys/customer-detail.vue'),
-            meta: { title: '客户详情', keepAlive: false, permission: ['dashboard'] }
+            meta: { title: '客户详情', keepAlive: false }
           }
           // 外部链接
           // {
@@ -101,64 +101,64 @@ export const asyncRouterMap = [
           //   meta: { title: '测试功能', keepAlive: true, permission: ['dashboard'] }
           // }
         ]
-      },
+      }
 
       // account
-      {
-        path: '/account',
-        component: RouteView,
-        redirect: '/account/center',
-        name: 'account',
-        meta: { title: '个人页', icon: 'user', keepAlive: true, permission: ['user'] },
-        children: [
-          {
-            path: '/account/center',
-            name: 'center',
-            component: () => import('@/views/account/center/Index'),
-            meta: { title: '个人中心', keepAlive: true, permission: ['user'] }
-          },
-          {
-            path: '/account/settings',
-            name: 'settings',
-            component: () => import('@/views/account/settings/Index'),
-            meta: { title: '个人设置', hideHeader: true, permission: ['user'] },
-            redirect: '/account/settings/base',
-            hideChildrenInMenu: true,
-            children: [
-              {
-                path: '/account/settings/base',
-                name: 'BaseSettings',
-                component: () => import('@/views/account/settings/BaseSetting'),
-                meta: { title: '基本设置', permission: ['user'] }
-              },
-              {
-                path: '/account/settings/security',
-                name: 'SecuritySettings',
-                component: () => import('@/views/account/settings/Security'),
-                meta: { title: '安全设置', keepAlive: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/custom',
-                name: 'CustomSettings',
-                component: () => import('@/views/account/settings/Custom'),
-                meta: { title: '个性化设置', keepAlive: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/binding',
-                name: 'BindingSettings',
-                component: () => import('@/views/account/settings/Binding'),
-                meta: { title: '账户绑定', keepAlive: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/notification',
-                name: 'NotificationSettings',
-                component: () => import('@/views/account/settings/Notification'),
-                meta: { title: '新消息通知', keepAlive: true, permission: ['user'] }
-              }
-            ]
-          }
-        ]
-      }
+      // {
+      //   path: '/account',
+      //   component: RouteView,
+      //   redirect: '/account/center',
+      //   name: 'account',
+      //   meta: { title: '个人页', icon: 'user', keepAlive: true },
+      //   children: [
+      //     {
+      //       path: '/account/center',
+      //       name: 'center',
+      //       component: () => import('@/views/account/center/Index'),
+      //       meta: { title: '个人中心', keepAlive: true }
+      //     },
+      //     {
+      //       path: '/account/settings',
+      //       name: 'settings',
+      //       component: () => import('@/views/account/settings/Index'),
+      //       meta: { title: '个人设置', hideHeader: true },
+      //       redirect: '/account/settings/base',
+      //       hideChildrenInMenu: true,
+      //       children: [
+      //         {
+      //           path: '/account/settings/base',
+      //           name: 'BaseSettings',
+      //           component: () => import('@/views/account/settings/BaseSetting'),
+      //           meta: { title: '基本设置' }
+      //         },
+      //         {
+      //           path: '/account/settings/security',
+      //           name: 'SecuritySettings',
+      //           component: () => import('@/views/account/settings/Security'),
+      //           meta: { title: '安全设置', keepAlive: true }
+      //         },
+      //         {
+      //           path: '/account/settings/custom',
+      //           name: 'CustomSettings',
+      //           component: () => import('@/views/account/settings/Custom'),
+      //           meta: { title: '个性化设置', keepAlive: true }
+      //         },
+      //         {
+      //           path: '/account/settings/binding',
+      //           name: 'BindingSettings',
+      //           component: () => import('@/views/account/settings/Binding'),
+      //           meta: { title: '账户绑定', keepAlive: true }
+      //         },
+      //         {
+      //           path: '/account/settings/notification',
+      //           name: 'NotificationSettings',
+      //           component: () => import('@/views/account/settings/Notification'),
+      //           meta: { title: '新消息通知', keepAlive: true }
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // }
 
       // forms
       // {

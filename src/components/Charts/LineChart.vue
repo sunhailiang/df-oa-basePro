@@ -36,7 +36,9 @@ export default {
       height: 400
     }
   },
-  mounted() {}
+  mounted() {
+    console.log('ARR', this.arr)
+  }
 }
 </script>
 <style lang="less" scoped>

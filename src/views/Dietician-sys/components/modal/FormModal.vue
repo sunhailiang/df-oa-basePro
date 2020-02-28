@@ -31,7 +31,7 @@
                   @close="close(MealTimes.早餐, item)"
                   :key="index"
                   color="#108ee9"
-                  >{{ item }}</a-tag
+                  >{{ item.name }}</a-tag
                 >
               </div>
             </div>
@@ -46,7 +46,7 @@
                   :key="index"
                   color="#108ee9"
                 >
-                  {{ item }}</a-tag
+                  {{ item.name }}</a-tag
                 >
               </div>
             </div>
@@ -60,7 +60,7 @@
                   @close="close(MealTimes.晚餐, item)"
                   :key="index"
                   color="#108ee9"
-                  >{{ item }}</a-tag
+                  >{{ item.name }}</a-tag
                 >
               </div>
             </div>
@@ -69,12 +69,12 @@
         <a-form-item v-if="cause === 1" label="客户不喜欢:" :labelCol="labelCol" :wrapperCol="wrapperCol">
           <div class="dislike-container">
             <a-tag
-              v-for="(item, index) in dislike"
+              v-for="item in dislike"
               closable
               @close="close(MealTimes.不喜欢, item)"
-              :key="index"
+              :key="item.value.oid"
               color="#108ee9"
-              >{{ item.value }}</a-tag
+              >{{ item.value.name }}</a-tag
             >
           </div>
         </a-form-item>
@@ -93,6 +93,7 @@ export default {
   name: 'FormModal',
   data() {
     return {
+      deleteId: '',
       cause: 0,
       labelCol: {
         xs: { span: 24 },
@@ -111,7 +112,8 @@ export default {
       breakfast: [],
       lunch: [],
       dinner: [],
-      dislike: []
+      dislike: [],
+      newTemp: []
     }
   },
   methods: {
@@ -121,29 +123,63 @@ export default {
       // 恢复食材
       type === 3 &&
         (value.type === 0
-          ? this.breakfast.push(value.value)
+          ? this.breakfast.push(value.value) && this.delete(value)
           : value.type === 1
-          ? this.lunch.push(value.value)
+          ? this.lunch.push(value.value) && this.delete(value)
           : value.type === 2
-          ? this.dinner.push(value.value)
+          ? this.dinner.push(value.value) && this.delete(value)
           : '')
     },
-    openModal(rowData) {
-      if (rowData) {
-        this.visible = true
-        let tempBreakFirst = rowData['breakfast'].split(',')
-        this.getArray(tempBreakFirst, this.breakfast) // 获取食材
-        let tempLuch = rowData['lunch'].split(',')
-        this.getArray(tempLuch, this.lunch)
-        let dinnerTemp = rowData['dinner'].split(',')
-        this.getArray(dinnerTemp, this.dinner)
+    delete(obj) {
+      for (let i = 0; i < this.dislike.length; i++) {
+        if (this.dislike[i].value.oid === obj.value.oid) {
+          this.dislike.splice(i, 1)
+        }
       }
     },
-    getArray(arr, resArr) {
-      arr.forEach(el => {
-        resArr.push(el.split('(')[0])
-      })
+    openModal(rowData) {
+      // 要删除的id
+      this.deleteId = rowData.oid
+      if (rowData) {
+        this.breakfast = []
+        this.lunch = []
+        this.dinner = []
+        this.dislike = []
+        this.visible = true
+        this.getArray(rowData['Breakfast'], 'Breakfast')
+        this.getArray(rowData['Lunch'], 'Lunch')
+        this.getArray(rowData['Dinner'], 'Dinner')
+      }
     },
+    getArray(str, type) {
+      let strArr = str.split('}')
+      let temp = []
+      for (let i = 0; i < strArr.length - 1; i++) {
+        strArr[i] += '}'
+        if (strArr[i].charAt(0) === ',') {
+          strArr[i] = strArr[i].substr(1)
+        }
+        temp.push(JSON.parse(strArr[i]))
+      }
+      switch (type) {
+        case 'Breakfast':
+          for (let i = 0; i < temp.length; i++) {
+            this.breakfast.push({ name: temp[i].Breakfast.split('(')[0], oid: temp[i].oid })
+          }
+          break
+        case 'Lunch':
+          for (let i = 0; i < temp.length; i++) {
+            this.lunch.push({ name: temp[i].Lunch.split('(')[0], oid: temp[i].oid })
+          }
+          break
+        case 'Dinner':
+          for (let i = 0; i < temp.length; i++) {
+            this.dinner.push({ name: temp[i].Dinner.split('(')[0], oid: temp[i].oid })
+          }
+          break
+      }
+    },
+
     closeModal() {
       this.visible = false
     },
@@ -153,12 +189,13 @@ export default {
       })
     },
     saveData() {
-      console.log(
-        'value',
-        this.form.validateFields((error, values) => {
-          error ? console.log('这里有个错', error) : this.$emit('save', values)
-        })
-      )
+      let cause = this.cause === 0 ? '配餐有误' : '客户不喜欢'
+      let idArr = []
+      // 取出id
+      for (let i = 0; i < this.dislike.length; i++) {
+        idArr.push({ foodOid: this.dislike[i].value.oid })
+      }
+      this.$emit('save', { id: this.deleteId, cause, dislike: idArr })
     }
   }
 }
