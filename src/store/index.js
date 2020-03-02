@@ -24,7 +24,21 @@ export default new Vuex.Store({
     editWeight: [],
     activeKey: '1'
   },
-  mutations: {},
-  actions: {},
-  getters
+  mutations: {
+    changeActiveKey(state, key) {
+      console.log('KKKKK', key)
+
+      state.activeKey = key
+    }
+  },
+  actions: {
+    changeActiveKey(ctx, key) {
+      ctx.commit('changeActiveKey', key) //派发
+    }
+  },
+  getters: {
+    getActiveKey(state) {
+      return state.activeKey
+    }
+  }
 })

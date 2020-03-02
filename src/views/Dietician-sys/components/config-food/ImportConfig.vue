@@ -277,8 +277,6 @@ export default {
       let currentUserOid = this.$store.state.userInfo.oid
       let customerOid = this.$route.params.id
       let serviceOid = this.userDetail.serviceOid
-      console.log('customerOid', customerOid)
-
       let parameter = {
         dietOid: this.guid(),
         customerOid: customerOid,
@@ -298,13 +296,13 @@ export default {
             this.$notification.success({
               message: '添加配餐成功'
             })
-            this.visible = true
-            this.$store.state.activeKey = '1'
+            this.$store.dispatch('changeActiveKey', '1')
+            this.visible = false
           }, 1000)
         } else {
           this.$notification['error']({
             message: '请求出错',
-            description: res.message + ':' + res.reponse,
+            description: res.message + ':' + res.response,
             duration: 4
           })
         }
@@ -389,7 +387,6 @@ export default {
       this.$emit('setImportVisible', this.visible)
     },
     handleOk(e) {
-      console.log('GUID', this.guid())
       this.loading = true
       this.getImg() // 获取图片
       setTimeout(() => {

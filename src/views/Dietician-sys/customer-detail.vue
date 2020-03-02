@@ -30,7 +30,7 @@
               : item == 'sex' && usertails[item] == 1
               ? '男'
               : usertails[item]
-          }}</detail-list-item
+          }}{{ activeKey }}</detail-list-item
         >
       </detail-list>
     </page-view>
@@ -62,7 +62,7 @@
       <div class="salesCard" style="min-height: 400px;">
         <a-tabs
           @change="setActiveKey"
-          :activeKey="this.activeKey.toString()"
+          :activeKey="activeKey"
           size="large"
           :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }"
         >
@@ -70,7 +70,7 @@
           <a-tab-pane tab="配餐历史" key="1">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div>
+                <div v-if="activeKey === '1'">
                   <s-table
                     ref="table"
                     size="default"
@@ -81,8 +81,6 @@
                   >
                     <span slot="action" slot-scope="text, record">
                       <template>
-                        <!-- 已经采纳的可以删除，未采纳的可以作废 -->
-                        <!-- <a @click="handleEdit({ record, type: 1 })">删除</a> -->
                         <a @click="openInvalidModal(record)">作废</a>
                         <Confirm ref="confirm" :isShow="isShow" :title="title" @doDelete="deleteRow(record)" />
                       </template>
@@ -95,7 +93,7 @@
           <a-tab-pane a-tab-pane loading="true" tab="快速配餐" key="2">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div style="height:490px; position: relative; top:0; left:0">
+                <div v-if="activeKey === '2'" style="height:490px; position: relative; top:0; left:0">
                   <InitModal @currentStep="getCurrent" />
                   <ConfigFoodTable
                     v-if="ConfigFoodStep.step === 2"
@@ -107,10 +105,19 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="打卡历史" key="3">
+          <a-tab-pane a-tab-pane loading="true" tab="客户忌口" key="3">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div style="min-height: 400px;">
+                <div v-if="activeKey === '3'" style=" position: relative; top:0; left:0">
+                  <CustomerAvoid />
+                </div>
+              </a-col>
+            </a-row>
+          </a-tab-pane>
+          <a-tab-pane loading="true" tab="打卡历史" key="4">
+            <a-row>
+              <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
+                <div style="min-height: 400px;" v-if="activeKey === '4'">
                   <CardHistory
                     size="default"
                     rowKey="id"
@@ -131,176 +138,183 @@
               </a-col>
             </a-row>
           </a-tab-pane>
-          <a-tab-pane loading="true" tab="协助打卡" key="4">
+          <a-tab-pane loading="true" tab="协助打卡" key="5">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">
-                  <a-form @submit="handleSubmit" :form="form">
-                    <a-form-item
-                      label="今日体重"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-input
-                        v-decorator="['weight', { rules: [{ required: true, message: '请输入体重(kg)' }] }]"
-                        name="weight"
-                        placeholder="请输入体重(kg)"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="身高"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-input
-                        v-decorator="['height', { rules: [{ required: true, message: '请输入身高(cm)' }] }]"
-                        name="height"
-                        placeholder="请输入身高(cm)"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="补卡日期"
-                      v-decorator="['AssistDate', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-date-picker @change="getDate" style="width:33.3vw" />
-                    </a-form-item>
-                    <a-form-item
-                      label="是否排便后称重"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                      :required="false"
-                    >
-                      <a-radio-group v-model="toilet">
-                        <a-radio :value="1">是</a-radio>
-                        <a-radio :value="2">否</a-radio>
-                      </a-radio-group>
-                    </a-form-item>
-                    <a-form-item
-                      label="昨日早餐 "
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-textarea
-                        rows="3"
-                        placeholder="请输入昨日早餐"
-                        v-decorator="['breakfast', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="昨日午餐"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-textarea
-                        rows="3"
-                        placeholder="请输入昨日午餐"
-                        v-decorator="['lunch', { rules: [{ required: true, message: '请输入昨日午餐' }] }]"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="午餐照片"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-upload name="file" :beforeUpload="beforeUpload" :showUploadList="false">
-                        <a-button icon="upload">选择图片</a-button>
-                      </a-upload>
-                    </a-form-item>
-                    <a-form-item
-                      label="昨日晚餐"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-textarea
-                        rows="3"
-                        placeholder="请输入昨日晚餐"
-                        v-decorator="['dinner', { rules: [{ required: true, message: '请输入昨日晚餐' }] }]"
-                      />
-                    </a-form-item>
-
-                    <a-form-item
-                      label="是否有加餐？"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                      :required="false"
-                    >
-                      <a-radio-group v-model="isExtraFood">
-                        <a-radio :value="1">没有</a-radio>
-                        <a-radio :value="2">有</a-radio>
-                      </a-radio-group>
-                      <a-textarea
-                        v-if="isExtraFood == 2"
-                        rows="3"
-                        placeholder="请输入加餐食物"
-                        v-decorator="['extraFood', { rules: [{ required: true, message: '请输入加餐食物' }] }]"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="入睡时间"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-select
-                        defaultValue="22:00~23:00"
-                        style="width:33.33vw"
-                        placeholder="请选择睡眠时间"
-                        v-decorator="['sleepTime', { rules: [{ required: true, message: '请选择睡眠时间' }] }]"
+                <div v-if="activeKey === '5'">
+                  <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">
+                    <a-form @submit="handleSubmit" :form="form">
+                      <a-form-item
+                        label="今日体重"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-select-option value="0:00~1:00">0:00~1:00</a-select-option>
-                        <a-select-option value="1:00~2:00">1:00~2:00</a-select-option>
-                        <a-select-option value="2:00~3:00">2:00~3:00</a-select-option>
-                        <a-select-option value="3:00~4:00">3:00~4:00</a-select-option>
-                        <a-select-option value="4:00~5:00">4:00~5:00</a-select-option>
-                        <a-select-option value="5:00~6:00">5:00~6:00</a-select-option>
-                        <a-select-option value="6:00~7:00">6:00~7:00</a-select-option>
-                        <a-select-option value="7:00~8:00">7:00~8:00</a-select-option>
-                        <a-select-option value="8:00~9:00">8:00~9:00</a-select-option>
-                        <a-select-option value="9:00~10:00">9:00~10:00</a-select-option>
-                        <a-select-option value="10:00~11:00">10:00~11:00</a-select-option>
-                        <a-select-option value="11:00~12:00">11:00~12:00</a-select-option>
-                        <a-select-option value="12:00~13:00">12:00~13:00</a-select-option>
-                        <a-select-option value="13:00~14:00">13:00~14:00</a-select-option>
-                        <a-select-option value="14:00~15:00">14:00~15:00</a-select-option>
-                        <a-select-option value="15:00~16:00">15:00~16:00</a-select-option>
-                        <a-select-option value="16:00~17:00">16:00~17:00</a-select-option>
-                        <a-select-option value="17:00~18:00">17:00~18:00</a-select-option>
-                        <a-select-option value="18:00~19:00">18:00~19:00</a-select-option>
-                        <a-select-option value="19:00~20:00">19:00~20:00</a-select-option>
-                        <a-select-option value="20:00~21:00">20:00~21:00</a-select-option>
-                        <a-select-option value="21:00~22:00">21:00~22:00</a-select-option>
-                        <a-select-option value="22:00~23:00">22:00~23:00</a-select-option>
-                      </a-select>
-                    </a-form-item>
-                    <a-form-item
-                      label="饮水量"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-input
-                        v-decorator="['water', { rules: [{ required: true, message: '请输入饮水量' }] }]"
-                        name="water"
-                        placeholder="请输入饮水量(L)"
-                      />
-                    </a-form-item>
-                    <a-form-item
-                      label="喝了多少小红杯"
-                      :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                      :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                    >
-                      <a-input
-                        v-decorator="['number', { rules: [{ required: true, message: '请输入小红杯食用数量(杯)' }] }]"
-                        name="number"
-                        placeholder="请输入小红杯食用数量(杯)"
-                      />
-                    </a-form-item>
+                        <a-input
+                          v-decorator="['weight', { rules: [{ required: true, message: '请输入体重(kg)' }] }]"
+                          name="weight"
+                          placeholder="请输入体重(kg)"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="身高"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-input
+                          v-decorator="['height', { rules: [{ required: true, message: '请输入身高(cm)' }] }]"
+                          name="height"
+                          placeholder="请输入身高(cm)"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="补卡日期"
+                        v-decorator="['AssistDate', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-date-picker @change="getDate" style="width:33.3vw" />
+                      </a-form-item>
+                      <a-form-item
+                        label="是否排便后称重"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                        :required="false"
+                      >
+                        <a-radio-group v-model="toilet">
+                          <a-radio :value="1">是</a-radio>
+                          <a-radio :value="2">否</a-radio>
+                        </a-radio-group>
+                      </a-form-item>
+                      <a-form-item
+                        label="昨日早餐 "
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-textarea
+                          rows="3"
+                          placeholder="请输入昨日早餐"
+                          v-decorator="['breakfast', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="昨日午餐"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-textarea
+                          rows="3"
+                          placeholder="请输入昨日午餐"
+                          v-decorator="['lunch', { rules: [{ required: true, message: '请输入昨日午餐' }] }]"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="午餐照片"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-upload
+                          name="file"
+                          v-decorator="['file']"
+                          :beforeUpload="beforeUpload"
+                          :showUploadList="false"
+                        >
+                          <a-button icon="upload">选择图片</a-button>
+                        </a-upload>
+                      </a-form-item>
+                      <a-form-item
+                        label="昨日晚餐"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-textarea
+                          rows="3"
+                          placeholder="请输入昨日晚餐"
+                          v-decorator="['dinner', { rules: [{ required: true, message: '请输入昨日晚餐' }] }]"
+                        />
+                      </a-form-item>
 
-                    <a-form-item :wrapperCol="{ span: 24 }" style="text-align: center">
-                      <a-button htmlType="submit" type="primary">提交</a-button>
-                    </a-form-item>
-                  </a-form>
-                </a-card>
+                      <a-form-item
+                        label="是否有加餐？"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                        :required="false"
+                      >
+                        <a-radio-group v-model="isExtraFood">
+                          <a-radio :value="1">没有</a-radio>
+                          <a-radio :value="2">有</a-radio>
+                        </a-radio-group>
+                        <a-textarea
+                          v-if="isExtraFood == 2"
+                          rows="3"
+                          placeholder="请输入加餐食物"
+                          v-decorator="['extraFood', { rules: [{ required: true, message: '请输入加餐食物' }] }]"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="入睡时间"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-select
+                          defaultValue="22:00~23:00"
+                          style="width:33.33vw"
+                          placeholder="请选择睡眠时间"
+                          v-decorator="['sleepTime', { rules: [{ required: true, message: '请选择睡眠时间' }] }]"
+                        >
+                          <a-select-option value="0:00~1:00">0:00~1:00</a-select-option>
+                          <a-select-option value="1:00~2:00">1:00~2:00</a-select-option>
+                          <a-select-option value="2:00~3:00">2:00~3:00</a-select-option>
+                          <a-select-option value="3:00~4:00">3:00~4:00</a-select-option>
+                          <a-select-option value="4:00~5:00">4:00~5:00</a-select-option>
+                          <a-select-option value="5:00~6:00">5:00~6:00</a-select-option>
+                          <a-select-option value="6:00~7:00">6:00~7:00</a-select-option>
+                          <a-select-option value="7:00~8:00">7:00~8:00</a-select-option>
+                          <a-select-option value="8:00~9:00">8:00~9:00</a-select-option>
+                          <a-select-option value="9:00~10:00">9:00~10:00</a-select-option>
+                          <a-select-option value="10:00~11:00">10:00~11:00</a-select-option>
+                          <a-select-option value="11:00~12:00">11:00~12:00</a-select-option>
+                          <a-select-option value="12:00~13:00">12:00~13:00</a-select-option>
+                          <a-select-option value="13:00~14:00">13:00~14:00</a-select-option>
+                          <a-select-option value="14:00~15:00">14:00~15:00</a-select-option>
+                          <a-select-option value="15:00~16:00">15:00~16:00</a-select-option>
+                          <a-select-option value="16:00~17:00">16:00~17:00</a-select-option>
+                          <a-select-option value="17:00~18:00">17:00~18:00</a-select-option>
+                          <a-select-option value="18:00~19:00">18:00~19:00</a-select-option>
+                          <a-select-option value="19:00~20:00">19:00~20:00</a-select-option>
+                          <a-select-option value="20:00~21:00">20:00~21:00</a-select-option>
+                          <a-select-option value="21:00~22:00">21:00~22:00</a-select-option>
+                          <a-select-option value="22:00~23:00">22:00~23:00</a-select-option>
+                        </a-select>
+                      </a-form-item>
+                      <a-form-item
+                        label="饮水量"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-input
+                          v-decorator="['water', { rules: [{ required: true, message: '请输入饮水量' }] }]"
+                          name="water"
+                          placeholder="请输入饮水量(L)"
+                        />
+                      </a-form-item>
+                      <a-form-item
+                        label="喝了多少小红杯"
+                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+                      >
+                        <a-input
+                          v-decorator="['number', { rules: [{ required: true, message: '请输入小红杯食用数量(杯)' }] }]"
+                          name="number"
+                          placeholder="请输入小红杯食用数量(杯)"
+                        />
+                      </a-form-item>
+
+                      <a-form-item :wrapperCol="{ span: 24 }" style="text-align: center">
+                        <a-button htmlType="submit" type="primary">提交</a-button>
+                      </a-form-item>
+                    </a-form>
+                  </a-card>
+                </div>
               </a-col>
             </a-row>
           </a-tab-pane>
@@ -323,6 +337,7 @@ import { PageView } from '@/layouts'
 import DetailList from '@/components/tools/DetailList'
 import InitModal from './components/config-food/InitModal'
 import ConfigFoodTable from './components/config-food/ConfigFoodTable'
+import CustomerAvoid from './components/table/CustomerAvoid'
 import {
   Confirm,
   STable,
@@ -446,6 +461,7 @@ export default {
   name: 'Analysis',
   mixins: [mixinDevice],
   components: {
+    CustomerAvoid,
     ConfigFoodTable,
     InitModal,
     CardHistory,
@@ -470,7 +486,7 @@ export default {
   },
   data() {
     return {
-      activeKey: this.$store.state.activeKey,
+      activeKey: '1',
       dingDate: '',
       uploadList: [],
       isShow: true,
@@ -513,8 +529,8 @@ export default {
           dataIndex: 'height'
         },
         {
-          title: '年纪',
-          dataIndex: 'age'
+          title: '打卡日期',
+          dataIndex: 'dingTime'
         },
         {
           title: '是否排便',
@@ -583,6 +599,7 @@ export default {
               let obj = {}
               obj['id'] = temp[i].id
               obj['firstAnswerGuid'] = temp[i].firstAnswerGuid
+              obj['dingTime'] = temp[i].dingTime
               for (let j = 0; j < temp[i].dingList.length; j++) {
                 if (temp[i].dingList[j].question === '午餐拍照') {
                   temp[i].dingList[j].answer = JSON.parse(temp[i].dingList[j].answer)[0]
@@ -691,6 +708,7 @@ export default {
   },
   methods: {
     setActiveKey(key) {
+      this.$store.dispatch('changeActiveKey', key)
       this.activeKey = key
     },
     getDate(date, dateString) {
@@ -713,6 +731,7 @@ export default {
                 temp.dietList.data[i][diets[j].name] = diets[j].food
               }
             }
+
             return res.response.dietList
           } else {
             return {
@@ -727,7 +746,6 @@ export default {
       }
     },
     splitStr(val, type) {
-      console.log('va', val)
       let strArr = val.split('}')
       let temp = []
       for (let i = 0; i < strArr.length - 1; i++) {
@@ -811,15 +829,16 @@ export default {
       this.$refs.confirm.showModal()
     },
     deleteRow(data) {
-      console.log('确认删除', data)
       deleteDing({ firstAnswerGuid: data.firstAnswerGuid }).then(res => {
-        console.log('删除打卡', res)
         if (res.success) {
           setTimeout(() => {
             this.$notification.success({
               message: res.message
             })
-            this.$router.go(0)
+            this.activeKey = '0'
+            this.$nextTick(() => {
+              this.activeKey = '4'
+            })
           }, 1000)
         } else {
           this.$notification['error']({
@@ -847,7 +866,10 @@ export default {
             this.$notification.success({
               message: res.message
             })
-            this.$router.go(0)
+            this.activeKey = '0'
+            this.$nextTick(() => {
+              this.activeKey = '1'
+            })
           }, 1000)
         } else {
           this.$notification['error']({
@@ -866,7 +888,6 @@ export default {
       reader.readAsDataURL(file)
       reader.onload = () => {
         this.options.img = reader.result
-        console.log('快来看', this.options.img)
         this.uploadList.push(encodeURIComponent(this.options.img))
       }
 
@@ -876,8 +897,6 @@ export default {
       return false
     },
     setParams(values, imgArr) {
-      console.log('图片呢?', imgArr)
-
       let resArr = []
       const guid = {
         heightGuid: 'B180EAC0-127D-4ECB-BDB6-C2599D310BD4',
@@ -949,16 +968,20 @@ export default {
         assistDing: resArr
       }
 
-      console.log('确认参数', param)
       ding(JSON.stringify(param)).then(res => {
-        console.log('上传结果', res)
         if (res.success) {
           setTimeout(() => {
             this.$notification.success({
               message: res.message
             })
-            this.$router.go(0)
+            this.$store.dispatch('changeActiveKey', '4')
           }, 1000)
+        } else {
+          this.$notification['error']({
+            message: '错误',
+            description: ((err.response || {}).data || {}).message,
+            duration: 4
+          })
         }
       })
     },
@@ -1072,12 +1095,14 @@ export default {
     }, 1000)
   },
   computed: {
-    ...mapState({
-      nickname: state => state.user.nickname,
-      welcome: state => state.user.welcome
-    }),
+    getActiveKey() {
+      console.log('变没变', this.$store.getters.getActiveKey)
+      this.activeKey = this.$store.getters.getActiveKey
+
+      return this.$store.getters.getActiveKey
+    },
     userInfo() {
-      return this.$store.getters.userInfo
+      return this.$store.state.userInfo
     }
   }
 }
