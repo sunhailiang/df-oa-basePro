@@ -1,184 +1,246 @@
 <template>
-  <a-card :bordered="false">
-    <div class="table-page-search-wrapper">
-      <a-form layout="inline">
-        <a-row :gutter="48">
-          <a-col :md="8" :sm="24">
-            <a-form-item label="忌口食材">
-              <a-input v-model="queryParam.customerName" placeholder />
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </a-form>
+  <div class="tb_content">
+    <a-button type="primary" class="todislike" @click="toDislike" icon="double-right" />
+    <a-button type="primary" class="tolike" @click="toNormal" icon="double-left" />
+    <div class="search-dislike">
+      <div style="text-align:center; padding:15px 0;">
+        <a-input-search style="width:20vw" v-model="searchFood" placeholder="查询忌口食材" @search="onSearch" />
+      </div>
+      <div v-if="refreshData">
+        <a-table
+          :rowSelection="dislikeSelection"
+          :columns="dislikeColumns"
+          :rowKey="record => record.oid"
+          :dataSource="foodData"
+          :loading="loading"
+          :pagination="false"
+        >
+        </a-table>
+      </div>
+
+      <MyPager :pagination="pagination" @changePageSize="onShowSizeChange" @changePageIndex="changePage" />
     </div>
+    <div class="dislike">
+      <div style="text-align:center; padding:15px 0; font-size:20px">
+        客户不喜欢的食材
+      </div>
 
-    <s-table ref="table" size="default" rowKey="id" :columns="columns" :data="loadData" showPagination="auto">
-      <span slot="serial" slot-scope="text, record, index">{{ index + 1 }}</span>
-      <span slot="status" slot-scope="text">
-        <a-badge :status="text | statusTypeFilter" :text="text | statusFilter" />
-      </span>
-      <span slot="description" slot-scope="text">
-        <ellipsis :length="4" tooltip>{{ text }}</ellipsis>
-      </span>
-
-      <span slot="action" slot-scope="text, record">
-        <template>
-          <a @click="handleEdit(record.oid)">详情</a>
-        </template>
-      </span>
-    </s-table>
-  </a-card>
+      <a-table
+        :columns="columns"
+        :rowKey="record => record.oid"
+        :rowSelection="rowSelection"
+        :dataSource="dislikedata"
+        :pagination="false"
+      >
+        <template slot="name" slot-scope="name"> {{ name.first }} {{ name.last }} </template>
+      </a-table>
+      <MyPager
+        :pagination="dislikePagination"
+        @changePageSize="onDislikeShowSizeChange"
+        @changePageIndex="DislikechangePage"
+      />
+    </div>
+  </div>
 </template>
 
 <script>
-import moment from 'moment'
-import { Ellipsis } from '@/components'
-import STable from './CustomerList'
-import {
-  getServiceList,
-  getServiceListCondition,
-  addCustomer,
-  agenterList,
-  supporterList,
-  serviceList
-} from '@/api/manage'
-
-const statusMap = {
-  0: {
-    status: 'default',
-    text: '女'
+const columns = [
+  {
+    title: 'ID',
+    dataIndex: 'id',
+    width: '45%'
   },
-  1: {
-    status: 'processing',
-    text: '男'
+  {
+    title: '食材名称',
+    dataIndex: 'name',
+    width: '45%'
   }
-}
-
-export default {
-  name: 'TableList',
-  components: {
-    STable,
-    Ellipsis
+]
+const dislikeColumns = [
+  {
+    title: 'ID',
+    dataIndex: 'id',
+    width: '45%'
   },
-
+  {
+    title: '食材名称',
+    dataIndex: 'name',
+    width: '45%'
+  }
+]
+import { getFoodList, getDislikeFood, addDislike, deleteDislikeFood } from '@/api/manage'
+import MyPager from './MyPager'
+export default {
+  name: 'CustomerAvoid',
+  components: { MyPager },
+  mounted() {},
   data() {
     return {
-      agenterList: [],
-      supporterList: [],
-      serviceType: [],
-      // 新增用户
-      userInfo: {
-        oid: '',
-        userName: '',
-        sex: 0,
-        age: 0,
-        province: '',
-        city: '',
-        initHeight: 0,
-        initWeight: 0,
-        supporterOid: '',
-        jobName: '',
-        jobStrength: '',
-        serviceOid: '',
-        agenterOid: ''
+      refreshData: true,
+      pagination: {
+        pageSizeOptions: ['10', '20', '30', '40', '50'],
+        current: 1,
+        pageSize: 10,
+        total: 0
       },
-      mdl: {},
-      // 高级搜索 展开/关闭
-      advanced: false,
-      // 查询参数
-      queryParam: {},
-      // 表头
-      columns: [
-        {
-          title: '客户编号',
-          dataIndex: 'oid'
-        },
-        {
-          title: '姓名',
-          dataIndex: 'userName'
-        },
-        {
-          title: '性别',
-          dataIndex: 'sex',
-          customRender: val => {
-            return val == 1 ? '男' : '女'
-          }
-        },
-        {
-          title: '年龄',
-          dataIndex: 'age'
-        },
-        {
-          title: '地区',
-          dataIndex: 'city'
-        },
-        {
-          title: '类别',
-          dataIndex: 'serviceName'
-        },
-        {
-          title: '归属客服',
-          dataIndex: 'supporterName'
-        },
-        {
-          title: '操作',
-          dataIndex: 'action',
-          width: '150px',
-          scopedSlots: { customRender: 'action' }
-        }
-      ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return getServiceList(Object.assign(parameter, this.queryParam)).then(res => {
-          if (res.response !== null) {
-            return res.response.customerList
-          } else {
-            return {
-              pageIndex: 1,
-              pageSize: 10,
-              dataCount: 0,
-              pageCount: 0,
-              data: []
-            }
-          }
-        })
+      dislikePagination: {
+        pageSizeOptions: ['10', '20', '30', '40', '50'],
+        current: 1,
+        pageSize: 10,
+        total: 0
       },
+      searchFood: '',
+      foodData: [],
+      dislikedata: [],
+      loading: false,
+      columns,
+      dislikeColumns,
       selectedRowKeys: [],
-      selectedRows: [],
-      optionAlertShow: false
+      selectedDislike: [],
+      toDisLikeData: [],
+      toNormalData: []
     }
   },
 
-  mounted() {},
+  mounted() {
+    this.getDislikeFoodList()
+  },
   methods: {
-    handleEdit(id) {
-      this.$router.push(`/customer/detail/${id}`)
+    toDislike() {
+      // 新增不喜欢
+      let params = {
+        customerOid: this.$route.params.id,
+        operaterOid: this.$store.state.userInfo.oid,
+        dislikeFoodList: this.toDisLikeData
+      }
+      addDislike(params).then(res => {
+        // 刷新数据
+        this.getFoodList()
+        this.getDislikeFoodList()
+        this.refreshData = false
+        this.$nextTick(() => {
+          this.refreshData = true
+        })
+      })
     },
-    handleOk(values) {
-      this.$refs.modal.closeModal()
+    toNormal() {
+      // 删除不喜欢
+      let params = {
+        customerOid: this.$route.params.id,
+        dislikeFoodList: this.toNormalData
+      }
+      deleteDislikeFood(params).then(res => {
+        console.log('sssss', res)
+
+        this.getDislikeFoodList()
+        if (this.searchFood != '') {
+          this.getFoodList()
+          this.refreshData = false
+          this.$nextTick(() => {
+            this.refreshData = true
+          })
+        }
+      })
     },
-    onSelectChange(selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
+    onDislikeShowSizeChange(val) {
+      // 不喜欢列表分页
+      this.dislikePagination = val
+      this.getDislikeFoodList()
     },
-    toggleAdvanced() {
-      this.advanced = !this.advanced
+    DislikechangePage(val) {
+      // 不喜欢列表分页
+      this.dislikePagination = val
+      this.getDislikeFoodList()
     },
-    resetSearchForm() {
-      this.queryParam = {
-        date: moment(new Date())
+    changePage(val) {
+      // 改变pageIndex
+      this.pagination = val
+      this.getFoodList()
+    },
+    onShowSizeChange(val) {
+      // 改变pageSize
+      this.pagination = val
+      this.getFoodList()
+    },
+    getDislikeFoodList() {
+      const param = {
+        pageIndex: this.dislikePagination.current,
+        pageSize: this.dislikePagination.pageSize,
+        oid: this.$route.params.id
+      }
+      getDislikeFood(param).then(res => {
+        if (res.success) {
+          this.dislikedata = res.response.dislikeFoodList.data
+          this.dislikePagination.total = res.response.dislikeFoodList.dataCount
+        }
+      })
+    },
+    getFoodList() {
+      const param = {
+        pageIndex: this.pagination.current,
+        pageSize: this.pagination.pageSize,
+        oid: this.$route.params.id,
+        foodName: this.searchFood
+      }
+
+      getFoodList(param).then(res => {
+        if (res.success) {
+          this.foodData = res.response.foodList.data
+          this.pagination.total = res.response.foodList.dataCount
+        }
+      })
+    },
+    onSearch(value) {
+      this.getFoodList()
+    }
+  },
+  computed: {
+    dislikeSelection() {
+      const { selectedRowKeys } = this
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          // 获取接口数据
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+          this.toDisLikeData = selectedRowKeys
+        },
+        getCheckboxProps: record => ({
+          props: {
+            disabled: record.customerDislikeStatus === -1 // Column configuration not to be checked
+          }
+        })
+      }
+    },
+    rowSelection() {
+      const { selectedRowKeys } = this
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows)
+          this.toNormalData = selectedRowKeys
+        }
       }
     }
   }
 }
 </script>
-
 <style lang="less" scoped>
-#dp {
-  background: red;
-}
-.table-operator {
-  padding: 1rem;
-  padding-left: 0;
+.tb_content {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  .search-dislike {
+    width: 48%;
+  }
+  .dislike {
+    width: 48%;
+  }
+  .todislike,
+  .tolike {
+    position: absolute;
+    left: 48.5%;
+    top: 50%;
+  }
+  .tolike {
+    top: 65%;
+  }
 }
 </style>

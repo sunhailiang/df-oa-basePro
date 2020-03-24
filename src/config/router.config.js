@@ -1,7 +1,6 @@
 // eslint-disable-next-line
 import { UserLayout, BasicLayout, RouteView, BlankLayout, PageView } from '@/layouts'
 import { bxAnaalyse } from '@/core/icons'
-
 export const constantRouterMap = [
   {
     path: '/user',
@@ -52,6 +51,15 @@ export const constantRouterMap = [
 
 export const asyncRouterMap = [
   {
+    path: '/ding/:id/:phone/:vip',
+    component: () => import(/* webpackChunkName: "user" */ '@/views/H5/Ding'),
+    meta: { title: '每日打卡', keepAlive: true }
+  },
+  {
+    path: '/mychange',
+    component: () => import(/* webpackChunkName: "user" */ '@/views/H5/MyChange')
+  },
+  {
     path: '/',
     name: 'index',
     component: BasicLayout,
@@ -81,6 +89,13 @@ export const asyncRouterMap = [
             name: 'Analysis',
             component: () => import('@/views/Dietician-sys/customer-detail.vue'),
             meta: { title: '客户详情', keepAlive: false }
+          },
+          {
+            hidden: 'false',
+            path: '/customer/blank/:id',
+            name: 'Analysis',
+            component: () => import('@/views/Dietician-sys/components/Blank.vue'),
+            meta: { title: '空白跳转页', keepAlive: false }
           }
           // 外部链接
           // {

@@ -7,15 +7,17 @@
       :confirmLoading="confirmLoading"
       @cancel="handleCancel"
     >
-      <a-input v-model="newVal" :addonBefore="type" />
+      <a-input v-model="newVal" type="number" @change="setDefault" :addonBefore="type" />
     </a-modal>
   </div>
 </template>
 <script>
+import LoginVue from '../../../user/Login.vue'
 export default {
   name: 'EditValue',
   data() {
     return {
+      timeType: '',
       visible: false,
       confirmLoading: false,
       type: '',
@@ -32,9 +34,25 @@ export default {
     }
   },
   methods: {
-    showModal(v) {
-      console.log('这样行得通么？', this.$store.state.editWeight)
-      Object.assign(this.temp, v)
+    deepClone(origin, target) {
+      var target = target || {}
+      for (var prop in target) {
+        if (target.hasOwnProperty(prop)) {
+          if (target[prop] !== null && typeof target[prop] === 'object') {
+            origin[prop] = Object.prototype.toString.call(target[prop]) === '[object Array]' ? [] : {}
+            this.deepClone(origin[prop], target[prop])
+          } else {
+            origin[prop] = target[prop]
+          }
+        }
+      }
+    },
+    setDefault(e) {
+      e.target.value <= 0 ? (this.newVal = 1) : ''
+    },
+    showModal(type, v) {
+      this.timeType = type
+      this.deepClone(this.temp, v)
       const editWeight = this.$store.state.editWeight
       let has = false
       if (editWeight.length > 0) {
@@ -59,31 +77,34 @@ export default {
       this.visible = true
     },
     handleOk() {
-      console.log('我丢', this.oldVal)
-
+      this.oldObj = {
+        oldE: 0,
+        oldC: 0,
+        oldP: 0,
+        oldF: 0
+      }
       for (let i = 0; i < this.temp.foodComponentList.length; i++) {
         switch (this.temp.foodComponentList[i].nameCode) {
           case 'C':
-            this.oldObj.oldC += this.temp.foodComponentList[i].value
+            this.oldObj.oldC = this.temp.foodComponentList[i].value
             break
           case 'F':
-            this.oldObj.oldF += this.temp.foodComponentList[i].value
+            this.oldObj.oldF = this.temp.foodComponentList[i].value
             break
           case 'P':
-            this.oldObj.oldP += this.temp.foodComponentList[i].value
+            this.oldObj.oldP = this.temp.foodComponentList[i].value
             break
           case 'E':
-            this.oldObj.oldE += this.temp.foodComponentList[i].value
+            this.oldObj.oldE = this.temp.foodComponentList[i].value
             break
           default:
             break
         }
       }
-      console.log('没改成功?', this.oldObj)
 
       this.obj.value = this.newVal
       let res = parseFloat(parseFloat(this.newVal) / parseFloat(this.oldVal)).toFixed(1)
-      this.$emit('reSetValue', { new: this.obj, old: this.oldObj, ratio: res })
+      this.$emit('reSetValue', { type: this.timeType, new: this.obj, old: this.oldObj, ratio: 1 - res })
       this.confirmLoading = true
       setTimeout(() => {
         this.visible = false

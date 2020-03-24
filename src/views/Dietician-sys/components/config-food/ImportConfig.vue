@@ -7,6 +7,7 @@
       :destroyOnClose="true"
       @ok="handleOk"
       @cancel="handleCancel"
+      width="450px"
       :bodyStyle="setImportStyle()"
     >
       <template slot="footer">
@@ -25,9 +26,29 @@
       </template>
       <img :src="imgUrl" alt="" v-if="showImg" />
       <div class="import-to-img" ref="importToImg" v-if="!showImg">
+        <div class="info">
+          <div class="title">
+            专属信息
+          </div>
+
+          <div class="customer">
+            <div class="customer-name">客户姓名</div>
+            <div class="customer-name-value">{{ userDetail.userName }}</div>
+            <div class="customer-gender">客户性别</div>
+            <div class="customer-gender-value">{{ userDetail.sex === 1 ? '男' : '女' }}</div>
+          </div>
+          <div class="dietician">
+            <div class="dieticianer">专属营养师</div>
+            <div class="dieticianer-name">{{ userDetail.supporterName }}</div>
+            <div class="configNum">配餐编号</div>
+            <div class="configCode"><QrCode :text="this.guid()" /></div>
+          </div>
+        </div>
+        <div class="config-line"></div>
+        <div class="config-title">精选配餐</div>
         <div class="config">
           <div class="type">
-            <div class="type-name">早餐</div>
+            <div class="type-name breakfast"></div>
             <div class="food-name">
               <span class="tag" v-for="item of breakFast" :key="item.oid" closable @close="deleteFood" color="#108ee9"
                 >{{ item.name }}({{ item.value }}g)</span
@@ -35,7 +56,7 @@
             </div>
           </div>
           <div class="type">
-            <div class="type-name">午餐</div>
+            <div class="type-name lunch"></div>
             <div class="food-name">
               <span class="tag" v-for="item of lunch" :key="item.oid" closable @close="deleteFood" color="#108ee9"
                 >{{ item.name }}({{ item.value }}g)</span
@@ -43,31 +64,12 @@
             </div>
           </div>
           <div class="type">
-            <div class="type-name last">晚餐</div>
+            <div class="type-name last dinner"></div>
             <div class="food-name ">
               <span class="tag" v-for="item of dinner" :key="item.oid" closable @close="deleteFood" color="#108ee9"
                 >{{ item.name }}({{ item.value }}g)</span
               >
             </div>
-          </div>
-        </div>
-        <div class="info">
-          <div class="title">
-            专属信息
-          </div>
-          <div class="config-info">
-            <div class="configNum">配餐编号</div>
-            <div class="configCode"><QrCode :text="this.guid()" /></div>
-          </div>
-          <div class="customer">
-            <div class="customer-name">客户姓名</div>
-            <div class="customer-name-value">{{ userDetail.userName }}</div>
-            <div class="customer-name">客户性别</div>
-            <div class="customer-name">{{ userDetail.sex === 1 ? '男' : '女' }}</div>
-          </div>
-          <div class="dietician">
-            <div class="dieticianer">专属营养师</div>
-            <div class="dieticianer">{{ userDetail.supporterName }}</div>
           </div>
         </div>
       </div>
@@ -79,6 +81,7 @@
   </div>
 </template>
 <script>
+import { tomorrow } from '@/utils/getDate'
 import html2canvas from 'html2canvas'
 import ScreenCapture from '../ScreenCapture'
 import QrCode from '@/components/Utils/QrCode'
@@ -86,6 +89,7 @@ import { addDiet } from '@/api/manage'
 export default {
   name: 'ImportConfig',
   props: {
+    isReExport: Boolean,
     userDetail: Object,
     isShow: {
       type: Boolean,
@@ -103,7 +107,6 @@ export default {
   },
   data() {
     return {
-      qrcodeTxt: '配餐码：7823EADC-044D-4CBA-A2D5-3CF8395443FF',
       visible: false,
       loading: false,
       imgUrl: '',
@@ -139,6 +142,8 @@ export default {
           { name: 'Dinner', food: [] }
         ]
       }
+      console.log('看下结构', this.tb)
+
       for (let key in this.tb) {
         switch (key) {
           case 'breakfastP':
@@ -297,6 +302,7 @@ export default {
               message: '添加配餐成功'
             })
             this.$store.dispatch('changeActiveKey', '1')
+            this.$store.commit('resetTodoCount', true)
             this.visible = false
           }, 1000)
         } else {
@@ -369,7 +375,8 @@ export default {
     downLoadImg(url) {
       var a = document.createElement('a')
       var event = new MouseEvent('click')
-      a.download = name || '推荐食谱'
+      a.download =
+        name || this.userDetail.userName + (this.userDetail.sex == 1 ? '先生' : '女士') + tomorrow() + '的专属食谱'
       a.href = url
       a.dispatchEvent(event)
     },
@@ -379,7 +386,8 @@ export default {
     setImportStyle() {
       return {
         padding: 0,
-        minHeight: '450px'
+        minHeight: '400px',
+        width: '450px'
       }
     },
     showModal() {
@@ -395,7 +403,11 @@ export default {
         this.lunch = []
         this.dinner = []
         this.$emit('setImportVisible', this.visible)
-        this.addDiet()
+        if (!this.isReExport) {
+          // 如果是重复导出就不用存储数据了
+          this.addDiet()
+        }
+
         this.loading = false
       }, 1000)
     },
@@ -410,24 +422,62 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+.import-to-img {
+  height: 662px;
+  background-image: url(~@/assets/images/import/bg.jpg);
+  background-size: 100% 100%;
+  position: relative;
+  padding-top: 78px;
+}
 .info {
+  color: white;
   .title {
-    padding: 16px 24px;
-    border-bottom: 1px solid #e8e8e8;
+    padding: 16px 34px;
     border-radius: 4px 4px 0 0;
-    color: rgba(0, 0, 0, 0.85);
     font-weight: 500;
-    font-size: 16px;
+    font-size: 19px;
   }
-  .config-info,
+  .dietician {
+    margin-top: 10px;
+  }
   .customer,
   .dietician {
+    font-size: 16px;
     display: flex;
     -webkit-box-align: center;
     -ms-flex-align: center;
     align-items: center;
     justify-content: space-around;
+    padding: 0 4px;
+    .customer-name-value,
+    .customer-gender-value {
+      text-align: left;
+      position: relative;
+      right: 35px;
+    }
+    .dieticianer {
+      padding-left: 12px;
+    }
+    .configNum {
+      padding-left: 38px;
+    }
+    .configCode,
+    .dieticianer-name {
+      position: relative;
+      right: 12px;
+    }
   }
+}
+.config-line {
+  height: 1px;
+  background-color: #fff;
+  margin: 12px auto;
+  width: 84%;
+}
+.config-title {
+  font-size: 19px;
+  padding-left: 36px;
+  color: white;
 }
 .type {
   display: flex;
@@ -436,21 +486,36 @@ export default {
   align-items: center;
   justify-content: space-around;
   .type-name {
-    width: 20%;
+    width: 7%;
+    border-radius: 6px;
     text-align: center;
     min-height: 100px;
-    line-height: 100px;
-    border-right: 1px solid #e8e8e8;
+    position: relative;
+    top: 10px;
+  }
+  .breakfast {
+    background-image: url(~@/assets/images/import/breakfast.png);
+    background-size: 100% 100%;
+  }
+  .lunch {
+    background-image: url(~@/assets/images/import/lunch.png);
+    background-size: 100% 100%;
+  }
+  .dinner {
+    background-image: url(~@/assets/images/import/dinner.png);
+    background-size: 100% 100%;
   }
   .food-name {
     text-align: left;
     min-height: 100px;
-    width: 80%;
+
+    width: 74%;
     padding: 5px 0;
-    border-bottom: 1px solid #e8e8e8;
-  }
-  .last {
-    border-bottom: 1px solid #e8e8e8;
+    border-radius: 10px;
+    position: relative;
+    right: 20px;
+    background-color: #fff;
+    margin-top: 20px;
   }
   .tag {
     display: inline-block;

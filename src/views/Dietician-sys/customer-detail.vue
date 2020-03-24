@@ -1,10 +1,18 @@
 <template>
   <div class="page-header-index-wide">
+    <div id="fixed" v-if="jump && (getActiveKey === '5' || getActiveKey === '2')"></div>
     <page-view :avatar="avatar" :title="false">
       <detail-list slot="headerContent" size="small" :col="2" class="detail-layout">
         <detail-list-item
           v-for="item in Object.keys(usertails).filter(
-            res => res != 'oid' && res != 'age' && res != 'initWeight' && res != 'city' && res != 'serviceName'
+            res =>
+              res != 'oid' &&
+              res != 'age' &&
+              res != 'initWeight' &&
+              res != 'city' &&
+              res != 'serviceName' &&
+              res != 'initHeight' &&
+              res != 'serviceOid'
           )"
           :key="item.oid"
           :term="
@@ -30,7 +38,7 @@
               : item == 'sex' && usertails[item] == 1
               ? '男'
               : usertails[item]
-          }}{{ activeKey }}</detail-list-item
+          }}</detail-list-item
         >
       </detail-list>
     </page-view>
@@ -59,10 +67,10 @@
     </a-row>
 
     <a-card :loading="loading" :bordered="false" :body-style="{ padding: '0' }">
-      <div class="salesCard" style="min-height: 400px;">
+      <div class="salesCard" id="anchor" style="min-height: 400px;">
         <a-tabs
           @change="setActiveKey"
-          :activeKey="activeKey"
+          :activeKey="getActiveKey"
           size="large"
           :tab-bar-style="{ marginBottom: '24px', paddingLeft: '16px' }"
         >
@@ -70,7 +78,14 @@
           <a-tab-pane tab="配餐历史" key="1">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div v-if="activeKey === '1'">
+                <div v-if="getActiveKey === '1'">
+                  <ImportConfigFood
+                    @setImportVisible="setImportVisible"
+                    :userDetail="usertails"
+                    :tb="tableList"
+                    :isShow="importShow"
+                    :isReExport="isReExport"
+                  />
                   <s-table
                     ref="table"
                     size="default"
@@ -82,6 +97,8 @@
                     <span slot="action" slot-scope="text, record">
                       <template>
                         <a @click="openInvalidModal(record)">作废</a>
+                        |
+                        <a @click="reExportConfig(record)">导出</a>
                         <Confirm ref="confirm" :isShow="isShow" :title="title" @doDelete="deleteRow(record)" />
                       </template>
                     </span>
@@ -93,13 +110,14 @@
           <a-tab-pane a-tab-pane loading="true" tab="快速配餐" key="2">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div v-if="activeKey === '2'" style="height:490px; position: relative; top:0; left:0">
+                <div v-if="getActiveKey === '2'" style="height:490px; position: relative; top:0; left:0">
                   <InitModal @currentStep="getCurrent" />
                   <ConfigFoodTable
                     v-if="ConfigFoodStep.step === 2"
                     :userDetail="usertails"
                     :resParams="this.resParams"
                     :step="ConfigFoodStep"
+                    @setActiveKey="setActiveKey"
                   />
                 </div>
               </a-col>
@@ -108,7 +126,7 @@
           <a-tab-pane a-tab-pane loading="true" tab="客户忌口" key="3">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div v-if="activeKey === '3'" style=" position: relative; top:0; left:0">
+                <div v-if="getActiveKey === '3'" style=" position: relative; top:0; left:0">
                   <CustomerAvoid />
                 </div>
               </a-col>
@@ -117,7 +135,7 @@
           <a-tab-pane loading="true" tab="打卡历史" key="4">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div style="min-height: 400px;" v-if="activeKey === '4'">
+                <div style="min-height: 400px;" v-if="getActiveKey === '4'">
                   <CardHistory
                     size="default"
                     rowKey="id"
@@ -141,10 +159,11 @@
           <a-tab-pane loading="true" tab="协助打卡" key="5">
             <a-row>
               <a-col :xl="24" :lg="12" :md="12" :sm="24" :xs="24">
-                <div v-if="activeKey === '5'">
+                <div v-if="getActiveKey === '5'">
                   <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">
                     <a-form @submit="handleSubmit" :form="form">
                       <a-form-item
+                        id="cccccc"
                         label="今日体重"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
@@ -181,8 +200,8 @@
                         :required="false"
                       >
                         <a-radio-group v-model="toilet">
-                          <a-radio :value="1">是</a-radio>
-                          <a-radio :value="2">否</a-radio>
+                          <a-radio :value="1">否</a-radio>
+                          <a-radio :value="2">是</a-radio>
                         </a-radio-group>
                       </a-form-item>
                       <a-form-item
@@ -327,10 +346,11 @@
 
 <script>
 import moment from 'moment'
+import ImportConfigFood from './components/config-food/ImportConfig'
+import $ from 'jquery'
 import { timeFix } from '@/utils/util'
 import dateFormater from '@/utils/dateFormater'
 import { mapState } from 'vuex'
-import HeadInfo from '@/components/tools/HeadInfo'
 import FormModal from './components/modal/FormModal'
 import CardHistory from './components/table/CardHistoryList'
 import { PageView } from '@/layouts'
@@ -338,23 +358,7 @@ import DetailList from '@/components/tools/DetailList'
 import InitModal from './components/config-food/InitModal'
 import ConfigFoodTable from './components/config-food/ConfigFoodTable'
 import CustomerAvoid from './components/table/CustomerAvoid'
-import {
-  Confirm,
-  STable,
-  LineChart,
-  ChartCard,
-  MiniArea,
-  MiniBar,
-  MiniProgress,
-  RankList,
-  Bar,
-  Trend,
-  Radar,
-  NumberInfo,
-  MiniSmoothArea
-} from '@/components'
-
-import { mixinDevice } from '@/utils/mixin'
+import { Confirm, STable, LineChart, Bar, Radar } from '@/components'
 import {
   getDeployHistory,
   getCardHistory,
@@ -371,27 +375,6 @@ import {
 } from '@/api/manage'
 import LoginVue from '../user/Login.vue'
 const DetailListItem = DetailList.Item
-const barData = []
-const barData2 = []
-for (let i = 0; i < 12; i += 1) {
-  barData.push({
-    x: `${i + 1}月`,
-    y: Math.floor(Math.random() * 1000) + 200
-  })
-  barData2.push({
-    x: `${i + 1}月`,
-    y: Math.floor(Math.random() * 1000) + 200
-  })
-}
-
-const rankList = []
-for (let i = 0; i < 7; i++) {
-  rankList.push({
-    name: '白鹭岛 ' + (i + 1) + ' 号店',
-    total: 1234.56 - i * 100
-  })
-}
-
 const searchUserData = []
 for (let i = 0; i < 7; i++) {
   searchUserData.push({
@@ -414,44 +397,7 @@ const searchUserScale = [
   }
 ]
 
-const searchData = []
-for (let i = 0; i < 50; i += 1) {
-  searchData.push({
-    index: i + 1,
-    keyword: `搜索关键词-${i}`,
-    count: Math.floor(Math.random() * 1000),
-    range: Math.floor(Math.random() * 100),
-    status: Math.floor((Math.random() * 10) % 2)
-  })
-}
-
 const DataSet = require('@antv/data-set')
-
-const sourceData = [
-  { item: '家用电器', count: 32.2 },
-  { item: '食用酒水', count: 21 },
-  { item: '个护健康', count: 17 },
-  { item: '服饰箱包', count: 13 },
-  { item: '母婴产品', count: 9 },
-  { item: '其他', count: 7.8 }
-]
-
-const pieScale = [
-  {
-    dataKey: 'percent',
-    min: 0,
-    formatter: '.0%'
-  }
-]
-
-const dv = new DataSet.View().source(sourceData)
-dv.transform({
-  type: 'percent',
-  field: 'count',
-  dimension: 'item',
-  as: 'percent'
-})
-const pieData = dv.rows
 
 const formatter = val => {
   return val ? moment(val).format('YYYY-MM-DD HH:mm:ss') : ''
@@ -459,8 +405,8 @@ const formatter = val => {
 
 export default {
   name: 'Analysis',
-  mixins: [mixinDevice],
   components: {
+    ImportConfigFood,
     CustomerAvoid,
     ConfigFoodTable,
     InitModal,
@@ -471,22 +417,26 @@ export default {
     Radar,
     DetailListItem,
     DetailList,
-    ChartCard,
-    MiniArea,
-    MiniBar,
-    MiniProgress,
-    RankList,
     Bar,
-    Trend,
-    NumberInfo,
-    MiniSmoothArea,
-    HeadInfo,
     PageView,
     LineChart
   },
   data() {
     return {
-      activeKey: '1',
+      isReExport: false,
+      tableList: {
+        breakfastP: [],
+        breakfastF: [],
+        breakfastC: [],
+        lunchP: [],
+        lunchF: [],
+        lunchC: [],
+        dinnerP: [],
+        dinnerF: [],
+        dinnerC: []
+      },
+      importShow: false,
+      jump: false,
       dingDate: '',
       uploadList: [],
       isShow: true,
@@ -534,10 +484,7 @@ export default {
         },
         {
           title: '是否排便',
-          dataIndex: 'isDefecate',
-          customRender: val => {
-            return val === 'right' ? '是' : '否'
-          }
+          dataIndex: 'isDefecate'
         },
         {
           title: '昨日早餐',
@@ -558,10 +505,7 @@ export default {
         },
         {
           title: '是否宵夜',
-          dataIndex: 'isNightSnack',
-          customRender: val => {
-            return val === 'right' ? '是' : '否'
-          }
+          dataIndex: 'isNightSnack'
         },
         {
           title: '宵夜',
@@ -674,16 +618,9 @@ export default {
       user: {},
       timeFix: timeFix(),
       loading: true,
-      rankList,
       // 搜索用户数
       searchUserData,
       searchUserScale,
-      searchData,
-      barData,
-      barData2,
-      pieScale,
-      pieData,
-      sourceData,
       pieStyle: {
         stroke: '#fff',
         lineWidth: 1
@@ -707,9 +644,108 @@ export default {
     }
   },
   methods: {
+    setImportVisible(visible) {
+      // 重新导出完成后置空
+      if (!visible) {
+        this.tableList = {
+          breakfastP: [],
+          breakfastF: [],
+          breakfastC: [],
+          lunchP: [],
+          lunchF: [],
+          lunchC: [],
+          dinnerP: [],
+          dinnerF: [],
+          dinnerC: []
+        }
+      }
+
+      this.isReExport = visible // 重复导出
+      this.importShow = visible
+    },
+    // 重新导出功能
+    reExportConfig(record) {
+      // 早餐
+      let bfs = []
+      for (let i = 0; i < record.Breakfast.split('}').length; i++) {
+        bfs.push(i === 0 ? record.Breakfast.split('}')[i] + '}' : record.Breakfast.split('}')[i].substring(1) + '}')
+      }
+      bfs = bfs.splice(0, bfs.length - 1)
+      for (let i = 0; i < bfs.length; i++) {
+        console.log('早餐咋了？', bfs)
+
+        let name = bfs[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')[0]
+        let value = bfs[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')
+        if (value.length > 2) {
+          value = value[2].split('g')[0]
+        } else {
+          value = value[1].split('g')[0]
+        }
+        this.tableList.breakfastP.push({ name, value })
+      }
+      // 午餐
+      let lunch = []
+      for (let i = 0; i < record.Lunch.split('}').length; i++) {
+        lunch.push(i === 0 ? record.Lunch.split('}')[i] + '}' : record.Lunch.split('}')[i].substring(1) + '}')
+      }
+      lunch = lunch.splice(0, lunch.length - 1)
+      for (let i = 0; i < lunch.length; i++) {
+        console.log('午餐咋了？', lunch)
+        let name = lunch[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')[0]
+        let value = lunch[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')
+        if (value.length > 2) {
+          value = value[2].split('g')[0]
+        } else {
+          value = value[1].split('g')[0]
+        }
+        this.tableList.lunchP.push({ name, value })
+      }
+      // 晚餐
+      let dinner = []
+      for (let i = 0; i < record.Dinner.split('}').length; i++) {
+        dinner.push(i === 0 ? record.Dinner.split('}')[i] + '}' : record.Dinner.split('}')[i].substring(1) + '}')
+      }
+      dinner = dinner.splice(0, dinner.length - 1)
+      for (let i = 0; i < dinner.length; i++) {
+        let name = bfs[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')[0]
+        let value = bfs[i]
+          .split(',')[0]
+          .split(':')[1]
+          .split('"')[1]
+          .split('(')
+        if (value.length > 2) {
+          value = value[2].split('g')[0]
+        } else {
+          value = value[1].split('g')[0]
+        }
+        this.tableList.dinnerP.push({ name, value })
+      }
+      this.isReExport = true
+      this.importShow = true
+    },
     setActiveKey(key) {
+      // this.activeKey = key
       this.$store.dispatch('changeActiveKey', key)
-      this.activeKey = key
     },
     getDate(date, dateString) {
       this.dingDate = dateString
@@ -825,7 +861,7 @@ export default {
       this.ConfigFoodStep = step.stepData
     },
     handleEdit(param) {
-      param.type == 1 ? (this.title = '删除配餐记录') : (this.title = '删除打卡记录')
+      param.type == 1 ? (this.title = '删除配餐记录') : (this.title = '打卡记录')
       this.$refs.confirm.showModal()
     },
     deleteRow(data) {
@@ -835,9 +871,9 @@ export default {
             this.$notification.success({
               message: res.message
             })
-            this.activeKey = '0'
+            this.$store.dispatch('changeActiveKey', '1')
             this.$nextTick(() => {
-              this.activeKey = '4'
+              this.$store.dispatch('changeActiveKey', '4')
             })
           }, 1000)
         } else {
@@ -866,9 +902,9 @@ export default {
             this.$notification.success({
               message: res.message
             })
-            this.activeKey = '0'
+            this.$store.dispatch('changeActiveKey', '0')
             this.$nextTick(() => {
-              this.activeKey = '1'
+              this.$store.dispatch('changeActiveKey', '1')
             })
           }, 1000)
         } else {
@@ -952,7 +988,7 @@ export default {
       resArr.push({ questionOID: guid.Conclusion, answerContent: '知道了' })
       resArr.push({
         questionOID: guid.isExtraFood,
-        answerContent: this.extraFood === 1 ? '否' : '是'
+        answerContent: this.isExtraFood == 1 ? '否' : '是'
       })
       this.isExtraFood != 1
         ? resArr.push({
@@ -960,7 +996,7 @@ export default {
             answerContent: values.extraFood
           })
         : ''
-      resArr.push({ questionOID: guid.isToiletGuid, answerContent: this.toilet === 1 ? '是' : '否' })
+      resArr.push({ questionOID: guid.isToiletGuid, answerContent: this.toilet == 1 ? '否' : '是' })
       let param = {
         customerOid: this.$route.params.id,
         supporterOid: this.$store.state.userInfo.oid,
@@ -975,32 +1011,48 @@ export default {
               message: res.message
             })
             this.$store.dispatch('changeActiveKey', '4')
+            this.$store.commit('resetTodoCount', true)
+            this.toilet = 1 // 初始化选项
+            this.isExtraFood = 1
+            this.uploadList = []
           }, 1000)
         } else {
           this.$notification['error']({
             message: '错误',
-            description: ((err.response || {}).data || {}).message,
+            description: res.response,
             duration: 4
           })
         }
       })
     },
-    handleSubmit(e) {
+    async handleSubmit(e) {
       e.preventDefault()
-      this.form.validateFields((err, values) => {
+      this.form.validateFields(async (err, values) => {
         if (!err) {
-          dingImg(JSON.stringify({ Base64Pic: this.uploadList })).then(res => {
-            let imgArr = []
-            if (res.success) {
-              imgArr.push(res.response.dingPicList[0].remoteOid)
-              setTimeout(() => {
-                this.$notification.success({
-                  message: res.message
+          let imgArr = []
+          console.log('有图了吧', this.uploadList.length)
+          if (this.uploadList.length > 0) {
+            await dingImg(JSON.stringify({ Base64Pic: this.uploadList })).then(res => {
+              if (res.success) {
+                console.log('A')
+                imgArr.push(res.response.dingPicList[0].remoteOid)
+                setTimeout(() => {
+                  this.$notification.success({
+                    message: res.message
+                  })
+                }, 1000)
+              } else {
+                this.$notification['error']({
+                  message: '错误',
+                  description: res.response,
+                  duration: 4
                 })
-              }, 1000)
-              this.setParams(values, imgArr)
-            }
-          })
+              }
+            })
+          }
+          console.log('BBB')
+
+          await this.setParams(values, imgArr)
         }
       })
     },
@@ -1035,9 +1087,61 @@ export default {
     }
   },
   mounted() {
-    getUserInfo(this.$route.params.id).then(res => {
-      console.log('多出了字段', res.response)
+    // this.$store.commit('setIntoStatus', 0)
+    this.$store.dispatch('changeActiveKey', '1')
+    if (this.$store.state.into === 1) {
+      this.jump = true
+      this.$nextTick(() => {
+        setTimeout(() => {
+          $('html,body').animate({ scrollTop: 800 }, 1600)
+        }, 500)
 
+        this.$store.dispatch('changeActiveKey', '5')
+        this.jump = false
+        this.$store.commit('setIntoStatus', 0)
+      })
+    }
+
+    if (this.$store.state.into === 2) {
+      this.jump = true
+      this.$nextTick(() => {
+        setTimeout(() => {
+          $('html,body').animate({ scrollTop: 800 }, 1600)
+        }, 800)
+
+        this.$store.dispatch('changeActiveKey', '5')
+        this.jump = false
+        this.$store.commit('setIntoStatus', 0)
+      })
+    }
+
+    if (this.$store.state.into === 3) {
+      this.jump = true
+      this.$nextTick(() => {
+        setTimeout(() => {
+          $('html,body').animate({ scrollTop: 800 }, 1600)
+        }, 800)
+
+        this.$store.dispatch('changeActiveKey', '2')
+        this.jump = false
+        this.$store.commit('setIntoStatus', 0)
+      })
+    }
+
+    if (this.$store.state.into === 4) {
+      this.jump = true
+      this.$nextTick(() => {
+        setTimeout(() => {
+          $('html,body').animate({ scrollTop: 800 }, 1600)
+        }, 800)
+
+        this.$store.dispatch('changeActiveKey', '2')
+        this.jump = false
+        this.$store.commit('setIntoStatus', 0)
+      })
+    }
+
+    getUserInfo(this.$route.params.id).then(res => {
       res.success ? (this.usertails = res.response) : ''
     })
     getBMI(this.$route.params.id).then(res => {
@@ -1083,8 +1187,6 @@ export default {
         }
         this.weight = resArr
       }
-
-      console.log('拿到体重列表', this.weight)
     })
   },
   created() {
@@ -1094,11 +1196,19 @@ export default {
       this.loading = !this.loading
     }, 1000)
   },
+  watch: {
+    setIntoStatus(val) {
+      if (val == 1 || val == 3) {
+        // 跳转
+        this.$router.push(`/customer/blank/${this.$store.state.toduUser.userOid}`)
+      }
+    }
+  },
   computed: {
+    setIntoStatus() {
+      return this.$store.getters.setIntoStatus
+    },
     getActiveKey() {
-      console.log('变没变', this.$store.getters.getActiveKey)
-      this.activeKey = this.$store.getters.getActiveKey
-
       return this.$store.getters.getActiveKey
     },
     userInfo() {
@@ -1109,6 +1219,15 @@ export default {
 </script>
 
 <style lang="less" scoped>
+#fixed {
+  z-index: 999;
+  width: 5%;
+  height: 10px;
+  background-color: red;
+  position: absolute;
+  top: 160%;
+  left: 60%;
+}
 .extra-wrapper {
   line-height: 55px;
   padding-right: 24px;

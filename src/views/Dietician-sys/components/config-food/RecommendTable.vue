@@ -32,7 +32,8 @@ export default {
     tbType: {
       type: Number,
       default: 0
-    }
+    },
+    recount: Object
   },
   mounted() {},
   computed: {
@@ -41,8 +42,8 @@ export default {
       const tbType = this.tbType
       return {
         onChange: (selectedRowKeys, selectedRows) => {
-          // console.log(`selectedRowKeys: ${selectedRowKeys}`, '瞅瞅人家拿到的数据: ', selectedRows)
-          this.$emit('getSelected', { tbType, selectedRows })
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, '瞅瞅人家拿到的数据: ', selectedRows)
+          this.$emit('getSelected', { tbType, selectedRows, recount: this.recount })
         }
       }
     }

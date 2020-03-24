@@ -25,7 +25,7 @@
           <a-tag
             class="tag"
             closable
-            @close="deleteFood(item.oid)"
+            @close="deleteFood(item)"
             v-for="item in selectedList"
             :key="item.oid"
             color="#108ee9"
@@ -44,6 +44,7 @@ export default {
   name: 'Recommend',
   data() {
     return {
+      deletedArr: [],
       loading: false,
       foodTypeEnum,
       visible: false,
@@ -75,17 +76,17 @@ export default {
     }
   },
   methods: {
-    deleteFood(oid) {
+    deleteFood(item) {
       if (this.flag) {
         for (let i = 0; i < this.selectedList.length; i++) {
-          if (this.selectedList[i].oid === oid) {
+          if (this.selectedList[i].oid === item.oid) {
             this.selectedList.splice(i, 1)
           }
         }
         this.resData = { type: this.params.time + this.params.type, data: this.selectedList }
       } else {
         for (let i = 0; i < this.tempList.length; i++) {
-          if (this.tempList[i].oid === oid) {
+          if (this.tempList[i].oid === item.oid) {
             this.tempList.splice(i, 1)
           }
         }
@@ -97,6 +98,8 @@ export default {
       this.getTable()
     },
     getrows(data) {
+      console.log('带过来了没?', data)
+
       if (data.tbType) {
         this.selectedList = this.tempList
         this.flag = true
@@ -158,10 +161,14 @@ export default {
     },
     handleOk(e) {
       this.confirmLoading = true
+
       this.resData = { type: this.params.time + this.params.type, data: this.selectedList }
+      console.log('根上错没错', this.selectedList)
       setTimeout(() => {
         this.visible = false
         this.$emit('setVisible', this.visible)
+        console.log('计算去', this.resData)
+
         this.$emit('setSelected', this.resData)
         this.selectedList = []
         this.confirmLoading = false

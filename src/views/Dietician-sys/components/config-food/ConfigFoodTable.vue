@@ -45,70 +45,95 @@
     <div class="allot">
       <div class="allot-left">待分配</div>
       <div class="weight">
-        <div class="carbohydrate" ref="breakfirstCarbohydrate">{{ this.scaledData[0].data[0].value }}g</div>
-        <div class="fat" ref="breakfirstFat">{{ this.scaledData[0].data[1].value }}g</div>
-        <div class="protein" ref="breakfirstProtein">{{ this.scaledData[0].data[2].value }}g</div>
+        <div class="carbohydrate" ref="breakfirstCarbohydrate">{{ parseInt(this.scaledData[0].data[0].value) }}g</div>
+        <div class="fat" ref="breakfirstFat">{{ parseInt(this.scaledData[0].data[1].value) }}g</div>
+        <div class="protein" ref="breakfirstProtein">{{ parseInt(this.scaledData[0].data[2].value) }}g</div>
       </div>
       <div class="weight">
-        <div class="carbohydrate" ref="lunchCarbohydrate">{{ this.scaledData[1].data[0].value }}g</div>
-        <div class="fat" ref="lunchFat">{{ this.scaledData[1].data[1].value }}g</div>
-        <div class="protein" ref="lunchProtein">{{ this.scaledData[1].data[2].value }}g</div>
+        <div class="carbohydrate" ref="lunchCarbohydrate">{{ parseInt(this.scaledData[1].data[0].value) }}g</div>
+        <div class="fat" ref="lunchFat">{{ parseInt(this.scaledData[1].data[1].value) }}g</div>
+        <div class="protein" ref="lunchProtein">{{ parseInt(this.scaledData[1].data[2].value) }}g</div>
       </div>
       <div class="weight">
-        <div class="carbohydrate" ref="dinnerCarbohydrate">{{ this.scaledData[2].data[0].value }}g</div>
-        <div class="fat" ref="dinnerFat">{{ this.scaledData[2].data[1].value }}g</div>
-        <div class="protein last-allot" ref="dinnerProtein">{{ this.scaledData[2].data[2].value }}g</div>
+        <div class="carbohydrate" ref="dinnerCarbohydrate">{{ parseInt(this.scaledData[2].data[0].value) }}g</div>
+        <div class="fat" ref="dinnerFat">{{ parseInt(this.scaledData[2].data[1].value) }}g</div>
+        <div class="protein last-allot" ref="dinnerProtein">{{ parseInt(this.scaledData[2].data[2].value) }}g</div>
       </div>
     </div>
     <div class="right">
       <div class="food-type">选择食材</div>
       <div class="food">
         <div class="carbohydrateFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.breakfastP" :key="item.oid" color="#108ee9"
+          <a-tag
+            @click="showEdit('breakfast', item)"
+            v-for="item in this.tableList.breakfastP"
+            :key="item.oid"
+            color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
         <div class="fatFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.breakfastF" :key="item.oid" color="#108ee9"
+          <a-tag
+            @click="showEdit('breakfast', item)"
+            v-for="item in this.tableList.breakfastF"
+            :key="item.oid"
+            color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }}))</a-tag
           >
         </div>
         <div class="proteinFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.breakfastC" :key="item.oid" color="#108ee9"
+          <a-tag
+            @click="showEdit('breakfast', item)"
+            v-for="item in this.tableList.breakfastC"
+            :key="item.oid"
+            color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
       </div>
       <div class="food">
         <div class="carbohydrateFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.lunchP" :key="item.oid" color="#108ee9"
+          <a-tag @click="showEdit('lunch', item)" v-for="item in this.tableList.lunchP" :key="item.oid" color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
         <div class="fatFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.lunchF" :key="item.oid" color="#108ee9"
+          <a-tag @click="showEdit('lunch', item)" v-for="item in this.tableList.lunchF" :key="item.oid" color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
         <div class="proteinFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.lunchC" :key="item.oid" color="#108ee9"
+          <a-tag @click="showEdit('lunch', item)" v-for="item in this.tableList.lunchC" :key="item.oid" color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
       </div>
       <div class="food">
         <div class="carbohydrateFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.dinnerP" :key="item.oid" color="#108ee9"
+          <a-tag
+            @click="showEdit('dinner', item)"
+            v-for="item in this.tableList.dinnerP"
+            :key="item.oid"
+            color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
         <div class="fatFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.dinnerF" :key="item.oid" color="#108ee9"
+          <a-tag
+            @click="showEdit('dinner', item)"
+            v-for="item in this.tableList.dinnerF"
+            :key="item.oid"
+            color="#108ee9"
             >{{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
         <div class="proteinFood last-proteinFood">
-          <a-tag @click="showEdit(item)" v-for="item in this.tableList.dinnerC" :key="item.oid" color="#108ee9">
+          <a-tag
+            @click="showEdit('dinner', item)"
+            v-for="item in this.tableList.dinnerC"
+            :key="item.oid"
+            color="#108ee9"
+          >
             {{ item.name }}({{ item.value + item.unit }})</a-tag
           >
         </div>
@@ -123,14 +148,20 @@
       </div>
     </div>
     <!-- <div v-if="show"> -->
-    <RecommendFood @setVisible="setVisible" @setSelected="setSelected" :isShow="show" :params="params" />
+    <RecommendFood
+      @setVisible="setVisible"
+      @setSelected="setSelected"
+      :isShow="show"
+      :params="params"
+      :recount="recount"
+    />
     <!-- </div> -->
 
     <ImportConfigFood
       @setImportVisible="setImportVisible"
       :userDetail="userDetail"
       :tb="tableList"
-      :recommendDailyFoodComponent="recommendDailyFoodComponent"
+      :recommendDailyFoodComponent="initSudokuData"
       :resParams="resParams"
       :isShow="importShow"
     />
@@ -143,6 +174,7 @@ import ImportConfigFood from './ImportConfig'
 import EditValue from './EditValue'
 import { getdailyFoodComponent, getcompoundFood } from '@/api/manage'
 import { keys } from 'mockjs2'
+import LoginVue from '../../../user/Login.vue'
 export default {
   name: 'ConfigFoodTable',
   props: {
@@ -156,6 +188,8 @@ export default {
   },
   data() {
     return {
+      recount: [], // 重新计算
+      initSudokuData: {},
       countData: 0,
       waitForCalculate: {
         E: 0,
@@ -185,7 +219,7 @@ export default {
       },
       scaledData: [
         {
-          type: '"Breakfast"',
+          type: 'Breakfast',
           value: '',
           data: [
             { nameCode: 'P', value: '' },
@@ -211,8 +245,7 @@ export default {
             { nameCode: 'C', value: '' }
           ]
         }
-      ],
-      recommendDailyFoodComponent: {}
+      ]
     }
   },
   components: {
@@ -224,171 +257,411 @@ export default {
     this.calculatePercentage()
   },
   methods: {
+    deepClone(origin, target) {
+      var target = target || {}
+      for (var prop in target) {
+        if (target.hasOwnProperty(prop)) {
+          if (target[prop] !== null && typeof target[prop] === 'object') {
+            origin[prop] = Object.prototype.toString.call(target[prop]) === '[object Array]' ? [] : {}
+            this.deepClone(origin[prop], target[prop])
+          } else {
+            origin[prop] = target[prop]
+          }
+        }
+      }
+    },
     async reSetValue(obj) {
+      // 修改食材重量
       await this.ratioCalculation(obj)
       await this.fit(obj)
     },
     fit(obj) {
-      for (let i = 0; i < obj.new.foodComponentList.length; i++) {
-        switch (obj.new.foodComponentList[i].nameCode) {
-          case 'C':
-            obj.old.oldC -= obj.new.foodComponentList[i].value
-            break
-          case 'P':
-            obj.old.oldP -= obj.new.foodComponentList[i].value
-            break
-          case 'E':
-            obj.old.oldE -= obj.new.foodComponentList[i].value
-            break
-          case 'F':
-            obj.old.oldF -= obj.new.foodComponentList[i].value
-            break
-          default:
-            break
+      if (obj.type === 'breakfast') {
+        for (let i = 0; i < this.scaledData.length; i++) {
+          if (this.scaledData[i].type === 'Breakfast') {
+            for (let j = 0; j < this.scaledData[i].data.length; j++) {
+              switch (this.scaledData[i].data[j].nameCode) {
+                case 'C':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'C') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+
+                  break
+                case 'F':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'F') {
+                      // 后端返回复数，加等于
+                      console.log('this.scaledData[i].data[j].value', this.scaledData[i].data[j].value)
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+                  break
+                case 'P':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'P') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+                  break
+                default:
+                  break
+              }
+            }
+          }
         }
       }
-      for (let i = 0; i < this.scaledData.length; i++) {
-        for (let j = 0; j < this.scaledData[i].data.length; j++) {
-          switch (this.scaledData[i].data[j].nameCode) {
-            case 'C':
-              this.scaledData[i].data[j].value += parseInt(obj.old.oldC / 3)
-              break
-            case 'F':
-              this.scaledData[i].data[j].value += parseInt(obj.old.oldF / 3)
-              break
-            case 'P':
-              this.scaledData[i].data[j].value += parseInt(obj.old.oldP / 3)
-              break
-            default:
-              break
+      if (obj.type === 'lunch') {
+        for (let i = 0; i < this.scaledData.length; i++) {
+          if (this.scaledData[i].type === 'Lunch') {
+            for (let j = 0; j < this.scaledData[i].data.length; j++) {
+              switch (this.scaledData[i].data[j].nameCode) {
+                case 'C':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'C') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+
+                  break
+                case 'F':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'F') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+                  break
+                case 'P':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'P') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+                  break
+                default:
+                  break
+              }
+            }
+          }
+        }
+      }
+
+      if (obj.type === 'dinner') {
+        for (let i = 0; i < this.scaledData.length; i++) {
+          if (this.scaledData[i].type === 'Dinner') {
+            for (let j = 0; j < this.scaledData[i].data.length; j++) {
+              switch (this.scaledData[i].data[j].nameCode) {
+                case 'C':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'C') {
+                      console.log('正负数问题', obj.new.foodComponentList[K].value)
+
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+
+                  break
+                case 'F':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'F') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                    }
+                  }
+                  break
+                case 'P':
+                  for (let K = 0; K < obj.new.foodComponentList.length; K++) {
+                    if (obj.new.foodComponentList[K].nameCode === 'P') {
+                      this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value
+                      // this.scaledData[i].data[j].value < 0
+                      //   ? (this.scaledData[i].data[j].value -= obj.new.foodComponentList[K].value)
+                      //   : (this.scaledData[i].data[j].value += obj.new.foodComponentList[K].value)
+                    }
+                  }
+                  break
+                default:
+                  break
+              }
+            }
           }
         }
       }
     },
+    // 按照新值得比例计算
     ratioCalculation(obj) {
       for (let i = 0; i < obj.new.foodComponentList.length; i++) {
-        obj.new.foodComponentList[i].value *= obj.ratio
+        obj.ratio > 0
+          ? (obj.new.foodComponentList[i].value *= obj.ratio)
+          : (obj.new.foodComponentList[i].value *= obj.ratio)
       }
     },
-    calculate(arr) {
-      for (let i = 0; i < arr.length; i++) {
-        for (let j = 0; j < arr[i].foodComponentList.length; j++) {
-          switch (arr[i].foodComponentList[j].nameCode) {
-            case 'E':
-              this.waitForCalculate.E += arr[i].foodComponentList[j].value
-              break
-            case 'C':
-              this.waitForCalculate.C += arr[i].foodComponentList[j].value
-              break
-            case 'F':
-              this.waitForCalculate.F += arr[i].foodComponentList[j].value
-              break
-            case 'P':
-              this.waitForCalculate.P += arr[i].foodComponentList[j].value
-              break
-            default:
-              break
+    calculate(timeType, arr) {
+      console.log('看下什么鬼', arr)
+      // 初始化在计算的数据
+      this.waitForCalculate = {
+        E: 0,
+        P: 0,
+        C: 0,
+        F: 0
+      }
+      // for (let i = 0; i < arr.length; i++) {
+      //   for (let j = 0; j < arr[i].foodComponentList.length; j++) {
+      //     switch (arr[i].foodComponentList[j].nameCode) {
+      //       case 'E':
+      //         this.waitForCalculate.E += Math.abs(arr[i].foodComponentList[j].value)
+      //         break
+      //       case 'C':
+      //         this.waitForCalculate.C += Math.abs(arr[i].foodComponentList[j].value)
+      //         break
+      //       case 'F':
+      //         this.waitForCalculate.F += Math.abs(arr[i].foodComponentList[j].value)
+      //         break
+      //       case 'P':
+      //         this.waitForCalculate.P += Math.abs(arr[i].foodComponentList[j].value)
+      //         break
+      //       default:
+      //         break
+      //     }
+      //   }
+      // }
+      console.log()
+
+      if (timeType === 'breakfast') {
+        let breakfirstArr = []
+        for (let item in this.tableList) {
+          if (item === 'breakfastP' || item === 'breakfastF' || item === 'breakfastC') {
+            for (let n = 0; n < this.tableList[item].length; n++) {
+              breakfirstArr.push(this.tableList[item][n])
+            }
+          }
+        }
+        let bc = 0 // 累加本次计算所有的C
+        let bp = 0
+        let bf = 0
+        for (let key in this.initSudokuData.mealList) {
+          if (this.initSudokuData.mealList[key].englishName === 'Breakfast') {
+            for (let j = 0; j < this.initSudokuData.mealList[key].componentList.length; j++) {
+              switch (this.initSudokuData.mealList[key].componentList[j].nameCode) {
+                case 'C':
+                  for (let a = 0; a < breakfirstArr.length; a++) {
+                    for (let b = 0; b < breakfirstArr[a].foodComponentList.length; b++) {
+                      if (breakfirstArr[a].foodComponentList[b].nameCode === 'C') {
+                        bc += breakfirstArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  // 重新计算
+                  this.scaledData[0].data[2].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(bc)
+                  break
+                case 'F':
+                  for (let a = 0; a < breakfirstArr.length; a++) {
+                    for (let b = 0; b < breakfirstArr[a].foodComponentList.length; b++) {
+                      if (breakfirstArr[a].foodComponentList[b].nameCode === 'F') {
+                        bf += breakfirstArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  this.scaledData[0].data[1].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(bf)
+
+                  break
+                case 'P':
+                  for (let a = 0; a < breakfirstArr.length; a++) {
+                    for (let b = 0; b < breakfirstArr[a].foodComponentList.length; b++) {
+                      if (breakfirstArr[a].foodComponentList[b].nameCode === 'P') {
+                        bp += breakfirstArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+
+                  this.scaledData[0].data[0].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(bp)
+                  break
+                default:
+                  break
+              }
+            }
           }
         }
       }
-      for (let i = 0; i < this.scaledData.length; i++) {
-        for (let j = 0; j < this.scaledData[i].data.length; j++) {
-          switch (this.scaledData[i].data[j].nameCode) {
-            case 'C':
-              this.scaledData[i].data[j].value -= parseInt(this.waitForCalculate.C / 3)
-              break
-            case 'F':
-              this.scaledData[i].data[j].value -= parseInt(this.waitForCalculate.F / 3)
-              break
-            case 'P':
-              this.scaledData[i].data[j].value -= parseInt(this.waitForCalculate.P / 3)
-              break
-            default:
-              break
+      if (timeType === 'lunch') {
+        let lunchArr = []
+        for (let item in this.tableList) {
+          if (item === 'lunchP' || item === 'lunchF' || item === 'lunchC') {
+            for (let n = 0; n < this.tableList[item].length; n++) {
+              lunchArr.push(this.tableList[item][n])
+            }
+          }
+        }
+        let lc = 0 // 累加本次计算所有的C
+        let lp = 0
+        let lf = 0
+        for (let key in this.initSudokuData.mealList) {
+          if (this.initSudokuData.mealList[key].englishName === 'Lunch') {
+            for (let j = 0; j < this.initSudokuData.mealList[key].componentList.length; j++) {
+              switch (this.initSudokuData.mealList[key].componentList[j].nameCode) {
+                case 'C':
+                  for (let a = 0; a < lunchArr.length; a++) {
+                    for (let b = 0; b < lunchArr[a].foodComponentList.length; b++) {
+                      if (lunchArr[a].foodComponentList[b].nameCode === 'C') {
+                        lc += lunchArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  // 重新计算
+                  this.scaledData[1].data[2].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(lc)
+                  break
+                case 'F':
+                  for (let a = 0; a < lunchArr.length; a++) {
+                    for (let b = 0; b < lunchArr[a].foodComponentList.length; b++) {
+                      if (lunchArr[a].foodComponentList[b].nameCode === 'F') {
+                        lf += lunchArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  this.scaledData[1].data[1].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(lf)
+
+                  break
+                case 'P':
+                  for (let a = 0; a < lunchArr.length; a++) {
+                    for (let b = 0; b < lunchArr[a].foodComponentList.length; b++) {
+                      if (lunchArr[a].foodComponentList[b].nameCode === 'P') {
+                        lp += lunchArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+
+                  this.scaledData[1].data[0].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(lp)
+                  break
+                default:
+                  break
+              }
+            }
+          }
+        }
+      }
+
+      if (timeType === 'dinner') {
+        let dinnerArr = []
+        for (let item in this.tableList) {
+          if (item === 'dinnerP' || item === 'dinnerF' || item === 'dinnerC') {
+            for (let n = 0; n < this.tableList[item].length; n++) {
+              dinnerArr.push(this.tableList[item][n])
+            }
+          }
+        }
+        let dc = 0 // 累加本次计算所有的C
+        let dp = 0
+        let df = 0
+        for (let key in this.initSudokuData.mealList) {
+          if (this.initSudokuData.mealList[key].englishName === 'Dinner') {
+            for (let j = 0; j < this.initSudokuData.mealList[key].componentList.length; j++) {
+              switch (this.initSudokuData.mealList[key].componentList[j].nameCode) {
+                case 'C':
+                  for (let a = 0; a < dinnerArr.length; a++) {
+                    for (let b = 0; b < dinnerArr[a].foodComponentList.length; b++) {
+                      if (dinnerArr[a].foodComponentList[b].nameCode === 'C') {
+                        dc += dinnerArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  // 重新计算
+                  this.scaledData[2].data[2].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(dc)
+                  break
+                case 'F':
+                  for (let a = 0; a < dinnerArr.length; a++) {
+                    for (let b = 0; b < dinnerArr[a].foodComponentList.length; b++) {
+                      if (dinnerArr[a].foodComponentList[b].nameCode === 'F') {
+                        df += dinnerArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+                  this.scaledData[2].data[1].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(df)
+
+                  break
+                case 'P':
+                  for (let a = 0; a < dinnerArr.length; a++) {
+                    for (let b = 0; b < dinnerArr[a].foodComponentList.length; b++) {
+                      if (dinnerArr[a].foodComponentList[b].nameCode === 'P') {
+                        dp += dinnerArr[a].foodComponentList[b].value
+                      }
+                    }
+                  }
+
+                  this.scaledData[2].data[0].value =
+                    this.initSudokuData.mealList[key].componentList[j].value - parseInt(dp)
+                  break
+                default:
+                  break
+              }
+            }
           }
         }
       }
     },
     setSelected(val) {
+      // 如果有特殊需求，某营养素超标使用
+      for (let i = 0; i < val.data.length; i++) {
+        val.data[i].value = Math.abs(val.data[i].value)
+      }
+
       switch (val.type) {
         case 'breakfastP':
-          console.log('AA')
           this.tableList.breakfastP = val.data
-          this.calculate(val.data)
+          this.calculate('breakfast', val.data)
           break
         case 'breakfastF':
-          console.log('BB')
           this.tableList.breakfastF = val.data
-          this.calculate(val.data)
+          this.calculate('breakfast', val.data)
           break
         case 'breakfastC':
-          console.log('CC')
           this.tableList.breakfastC = val.data
-          this.calculate(val.data)
+          this.calculate('breakfast', val.data)
           break
         case 'lunchP':
-          console.log('DD')
           this.tableList.lunchP = val.data
-          this.calculate(val.data)
+          this.calculate('lunch', val.data)
           break
         case 'lunchF':
-          console.log('EE')
           this.tableList.lunchF = val.data
-          this.calculate(val.data)
+          this.calculate('lunch', val.data)
           break
         case 'lunchC':
-          console.log('FF')
           this.tableList.lunchC = val.data
-          this.calculate(val.data)
+          this.calculate('lunch', val.data)
           break
         case 'dinnerP':
-          console.log('GG')
           this.tableList.dinnerP = val.data
-          this.calculate(val.data)
+          this.calculate('dinner', val.data)
           break
         case 'dinnerF':
-          console.log('HH')
           this.tableList.dinnerF = val.data
-          this.calculate(val.data)
+          this.calculate('dinner', val.data)
           break
         case 'dinnerC':
-          console.log('II')
           this.tableList.dinnerC = val.data
-          this.calculate(val.data)
+          this.calculate('dinner', val.data)
           break
         default:
       }
-      console.log('所有的数据', this.tableList)
     },
     calculatePercentage() {
       let data = this.step.arr
-      let total = this.step.total
-      let p = parseInt((total * data[0].value) / 100 / 3)
-      let f = parseInt((total * data[1].value) / 100 / 3)
-      let c = parseInt((total * data[2].value) / 100 / 3)
-      console.log('p', p)
-      console.log('f', f)
-      console.log('c', c)
 
-      // 早餐
-      this.scaledData[0].data[0].value = p
-      this.scaledData[0].data[1].value = c
-      this.scaledData[0].data[2].value = f
-      // 午餐
-      this.scaledData[1].data[0].value = p
-      this.scaledData[1].data[1].value = c
-      this.scaledData[1].data[2].value = f
-      // 晚餐
-      this.scaledData[2].data[0].value = p
-      this.scaledData[2].data[1].value = c
-      this.scaledData[2].data[2].value = f
+      let total = this.step.total
       // 参数
       let params = { dailyEnergy: total, pValue: data[0].value, fValue: data[1].value, cValue: data[2].value }
       getdailyFoodComponent(params).then(res => {
         if (res.success) {
           let data = res.response.mealList
-          console.log('九宫格推荐数据', res.response)
-          Object.assign(this.recommendDailyFoodComponent, res.response) // 存储推荐的营养数据
+          this.deepClone(this.initSudokuData, res.response) // 最初的数据
+          console.log('这是默认或者调整过后的比例', this.initSudokuData)
 
           for (let i = 0; i < data.length; i++) {
             if (data[i].englishName === 'Breakfast') {
@@ -437,8 +710,8 @@ export default {
         }
       })
     },
-    showEdit(item) {
-      this.$refs.edit.showModal(item)
+    showEdit(type, item) {
+      this.$refs.edit.showModal(type, item)
     },
     deleteFood() {
       console.log('删除食物')
@@ -456,11 +729,19 @@ export default {
       this.params.time = time
       this.params.type = type
       this.params.weight = value
+      this.recount = [] // 重新整体计算餐次数据的数组
       for (let key in this.tableList) {
         if (key === time + type) {
           this.params.currentObj = this.tableList[key]
         }
+        if (key.indexOf(time) > -1) {
+          console.log('找得到吧', this.tableList[key])
+          for (let j = 0; j < this.tableList[key].length; j++) {
+            this.recount.push(this.tableList[key][j])
+          }
+        }
       }
+      console.log('应该是Ok的', this.recount)
 
       this.show = true
     }

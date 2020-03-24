@@ -8,6 +8,7 @@ const api = {
   serviceCondition: '/CustomerList/Condition', // 条件检索
   originalCustomer: '/Customer/OriginalCustomer/', // 检索指定客户
   agenterList: '/AgenterList', // 代理列表
+  selectAgenterList: '/AgenterList/', //{agenterName} 查询代理列表
   supporterList: '/SupporterList', // 客服列表
   serviceList: '/ServiceList', // 服务列表
   customer: '/Customer/', // 获取客户信息+/{oid}
@@ -25,7 +26,19 @@ const api = {
   addDiet: '/Diet', // 新增配餐记录
   deleteDiet: '/Diet/Delete', // 删除一条配餐记录
   deleteDing: '/Ding/Delete', // 删除一条打卡记录
-  permission: '/permission',
+  getFoodList: '/FoodList/Condition/', //{oid}/{foodName} 获取带喜好标志的食物列表
+  getDislikeFood: '/FoodList/Dislike/', // 获取用户不喜欢的食材列表 {oid}
+  addDislike: '/FoodList/Dislike', // 新增不喜欢食材
+  dislikeDelete: '/FoodList/Dislike/Delete', //删除不喜欢的食材
+  todoDietList: '/Supporter/TodoDietList/', //指定客服指定日期的配餐代办事项 {supporterOid}/{dateTime}
+  todoDietListCount: '/Supporter/TodoDietListCount/', //指定客服的指定日期待配餐总数{supporterOid}/{dateTime}
+  todoDingList: '/Supporter/TodoDingList/', //指定客服指定日期的打卡代办事项 {supporterOid}/{dateTime},
+  todoDingListCount: '/Supporter/TodoDingListCount/', //指定客服指定日期的待带卡代办总数{supporterOid}/{dateTime}
+  isVip: '/Customer/IsVIP/', //{cellphone} 判断是否是vip -- 小程序
+  dingToday: '/Ding/Today/', //{customerOid}判断用户是否可以执行打卡--小程序
+  customerDing: '/Ding/Customer', // 新增用户打卡 --小程序
+  weightList: '/Customer/Customer/WeightList/', //{oid}' 获取用户体重--小程序
+  mecuryToday: '/Customer/Physique/Today/', //{cellphone} 今天是否可以做体质测试
   permissionNoPager: '/permission/no-pager',
   orgTree: '/org/tree',
   cardhistory: '/cardhistory'
@@ -34,6 +47,118 @@ const api = {
 
 export default api
 
+export function mecuryToday(parameter) {
+  return axios({
+    url: api.mecuryToday + parameter,
+    method: 'get'
+  })
+}
+export function weightList(parameter) {
+  //获取体重列表--小程序
+  return axios({
+    url: api.weightList + parameter.oid,
+    method: 'get',
+    params: { dataCount: parameter.dataCount }
+  })
+}
+
+export function customerDing(parameter) {
+  // 客户打卡--小程序
+  return axios({
+    url: api.customerDing,
+    method: 'post',
+    data: parameter
+  })
+}
+export function dingToday(parameter) {
+  // 判断是否可以今日打卡 -- 小程序
+  return axios({
+    url: api.dingToday + parameter,
+    method: 'get'
+  })
+}
+
+export function isVip(parameter) {
+  // 判断是否是vip--小程序
+  return axios({
+    url: api.isVip + parameter,
+    method: 'get'
+  })
+}
+export function selectAgenterList(parameter) {
+  // 检索代理列表
+  return axios({
+    url: api.selectAgenterList + parameter,
+    method: 'get'
+  })
+}
+
+export function todoDietList(parameter) {
+  //待办配餐列表
+  return axios({
+    url: api.todoDietList + parameter.oid + '/' + parameter.dateTime,
+    method: 'get'
+  })
+}
+export function todoDietListCount(parameter) {
+  //待办配餐总数
+  return axios({
+    url: api.todoDietListCount + parameter.oid + '/' + parameter.dateTime,
+    method: 'get'
+  })
+}
+export function todoDingList(parameter) {
+  //待办打卡列表
+  return axios({
+    url: api.todoDingList + parameter.oid + '/' + parameter.dateTime,
+    method: 'get'
+  })
+}
+export function todoDingListCount(parameter) {
+  //待办打卡列表总数
+  return axios({
+    url: api.todoDingListCount + parameter.oid + '/' + parameter.dateTime,
+    method: 'get'
+  })
+}
+export function deleteDislikeFood(parameter) {
+  // 删除不喜欢食材
+  return axios({
+    url: api.dislikeDelete,
+    method: 'post',
+    data: parameter
+  })
+}
+export function addDislike(parameter) {
+  //添加不喜欢的食材
+  return axios({
+    url: api.addDislike,
+    method: 'post',
+    data: parameter
+  })
+}
+export function getDislikeFood(parameter) {
+  // 获取用户不喜欢的食物列表
+  return axios({
+    url: api.getDislikeFood + parameter.oid,
+    method: 'get',
+    params: {
+      pageIndex: parameter.pageIndex,
+      pageSize: parameter.pageSize
+    }
+  })
+}
+export function getFoodList(parameter) {
+  //获取带标识的食材列表
+  return axios({
+    url: api.getFoodList + parameter.oid + '/' + parameter.foodName,
+    method: 'get',
+    params: {
+      pageIndex: parameter.pageIndex,
+      pageSize: parameter.pageSize
+    }
+  })
+}
 export function deleteDing(parameter) {
   // 删除打卡记录
   return axios({

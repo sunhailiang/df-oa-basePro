@@ -8,18 +8,36 @@
         <a-input addonBefore="卡路里" addonAfter="kcal" defaultValue="0" v-model="total" size="small" />
       </div>
       <div class="setval" v-if="step === 1">
-        <p v-for="item in stepData.arr" :key="item.nameCode">
+        <p>
           <a-input
-            :addonBefore="item.name"
-            :addonAfter="item.unit"
-            v-model="item.value"
+            :addonBefore="stepData.arr[0].name"
+            :addonAfter="stepData.arr[0].unit"
+            v-model="stepData.arr[0].value"
+            defaultValue="0"
+            size="small"
+          />
+        </p>
+        <p>
+          <a-input
+            :addonBefore="stepData.arr[1].name"
+            :addonAfter="stepData.arr[1].unit"
+            v-model="stepData.arr[1].value"
+            defaultValue="0"
+            size="small"
+          />
+        </p>
+        <p>
+          <a-input
+            :addonBefore="stepData.arr[2].name"
+            :addonAfter="stepData.arr[2].unit"
+            v-model="stepData.arr[2].value"
             defaultValue="0"
             size="small"
           />
         </p>
       </div>
       <div class="nextstep" v-if="step === 0">
-        <a-button type="primary" size="small" @click="nextStep">下一步</a-button>
+        <a-button type="primary" size="small" :disabled="total <= 0" @click="nextStep">下一步</a-button>
       </div>
       <div class="nextstep" v-if="step === 1">
         <a-button type="primary" size="small" @click="getConfigData">确定</a-button>
@@ -35,7 +53,7 @@ export default {
     return {
       step: 0,
       total: 0,
-      stepData: {},
+      stepData: { arr: [] },
       loading: false,
       recommendDailyComponentPercentage: {},
       recommendDailyEnergy: '',
@@ -48,14 +66,9 @@ export default {
     getDailyEnergy(this.$route.params.id).then(res => {
       if (res.success == true) {
         this.total = res.response.value
-        console.log('没赋值呢还', res.response)
-
         this.recommendDailyEnergy = res.response.value + 'kcal'
-        console.log('推荐千卡', this.recommendDailyEnergy)
-        // this.total+'?'
         getComponentPercentage().then(res => {
           if (res.success) {
-            console.log('百分比', res.response)
             Object.assign(this.recommendDailyComponentPercentage, res.response)
             this.stepData.total = this.total
             let list = res.response.componentList
@@ -94,7 +107,6 @@ export default {
   methods: {
     nextStep() {
       this.currentDailyEnergy = this.total + 'kcal'
-      console.log('实际千卡', this.currentDailyEnergy)
       this.step = 1
     },
     getConfigData() {

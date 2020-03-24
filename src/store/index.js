@@ -22,13 +22,23 @@ export default new Vuex.Store({
   state: {
     userInfo: {},
     editWeight: [],
-    activeKey: '1'
+    activeKey: '1',
+    toduUser: {},
+    into: 0,
+    todoCount: false
   },
   mutations: {
     changeActiveKey(state, key) {
-      console.log('KKKKK', key)
-
       state.activeKey = key
+    },
+    setIntoStatus(state, key) {
+      state.into = key
+    },
+    settoduUser(state, user) {
+      Object.assign(state.toduUser, user)
+    },
+    resetTodoCount(state, count) {
+      state.todoCount = count
     }
   },
   actions: {
@@ -37,8 +47,17 @@ export default new Vuex.Store({
     }
   },
   getters: {
+    resetTodoCount(state) {
+      return state.todoCount
+    },
     getActiveKey(state) {
       return state.activeKey
+    },
+    setIntoStatus(state) {
+      return state.into
+    },
+    settoduUser(state) {
+      return state.toduUser
     }
   }
 })

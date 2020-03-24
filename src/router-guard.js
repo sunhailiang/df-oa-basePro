@@ -10,6 +10,10 @@ const defaultRoutePath = '/'
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
+  if (to.path.indexOf('/ding') > -1) {
+    next()
+    return
+  }
   if (Vue.ls.get(ACCESS_TOKEN)) {
     /* has token */
     if (to.path === '/user/login') {
@@ -23,10 +27,6 @@ router.beforeEach((to, from, next) => {
       // 在免登录白名单，直接进入
       next()
     } else {
-      notification.error({
-        message: '错误',
-        description: '请求用户信息失败，请重试'
-      })
       store.dispatch('Logout').then(() => {
         next({ path: '/user/login', query: { redirect: to.fullPath } })
       })
