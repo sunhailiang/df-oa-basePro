@@ -110,7 +110,8 @@ export default {
         this.chartData = []
         if (res.success) {
           this.initWeight = res.response.initWeight
-          this.loseWeight = res.response.initWeight - res.response.weightList[0].weight
+          const lost = res.response.initWeight - res.response.weightList[0].weight
+          this.loseWeight = parseFloat(lost).toFixed(1)
           //专属客服电话
           this.phone = res.response.cellphone
           //获取移动打卡的天数

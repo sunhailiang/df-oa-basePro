@@ -288,7 +288,7 @@ export default {
       this.userInfo.initHeight = parseFloat(values.initHeight)
       this.userInfo.initWeight = parseFloat(values.initWeight)
       this.userInfo.supporterOid = values.service
-      this.userInfo.jobName = values.job
+      this.userInfo.jobName = values.jobName
       this.userInfo.jobStrength = values.jobStrength
       this.userInfo.serviceOid = values.type
       this.userInfo.agenterOid = values.agency

@@ -12,7 +12,7 @@
             <a-input
               size="large"
               type="text"
-              placeholder="账户: supporter01"
+              placeholder="请输入营养师账号"
               v-decorator="[
                 'loginID',
                 {
@@ -30,7 +30,7 @@
               size="large"
               type="password"
               autocomplete="false"
-              placeholder="密码: 123456"
+              placeholder="请输入营养师密码"
               v-decorator="[
                 'password',
                 { rules: [{ required: true, message: '请输入密码' }], validateTrigger: 'blur' }

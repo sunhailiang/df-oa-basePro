@@ -46,10 +46,9 @@
         <a-form :form="form">
           <a-form-item label="姓名" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
             <a-input
-              value="xxx"
               class="num-input"
               v-decorator="[
-                'name',
+                'userName',
                 { rules: [{ required: true, message: '请输入客户姓名' }], initialValue: this.userInfo.userName }
               ]"
               placeholder="请输入客户姓名"
@@ -84,36 +83,39 @@
               placeholder="请输入客户所在市"
             />
           </a-form-item>
-          <a-form-item label="初始体重" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
+          <a-form-item label="初始体重(kg)" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
             <a-input-number
               :min="0"
               class="num-input"
               v-decorator="[
-                'weight',
+                'initWeight',
                 { rules: [{ required: true, message: '请输入客户初始体重' }], initialValue: this.userInfo.initWeight }
               ]"
-              placeholder="请输入初始体重"
+              placeholder="请输入初始体重(kg)"
             />
           </a-form-item>
-          <a-form-item label="身高" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
+          <a-form-item label="身高(cm)" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
             <a-input-number
               :min="0"
               class="num-input"
               v-decorator="[
-                'height',
+                'initHeight',
                 { rules: [{ required: true, message: '请输入客户身高' }], initialValue: this.userInfo.initHeight }
               ]"
-              placeholder="请输入客户身高"
+              placeholder="请输入客户身高(cm)"
             />
           </a-form-item>
           <a-form-item label="工作名称" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
             <a-input
-              v-decorator="['job', { rules: [{ required: true, message: '请输入客户工作名称' }] }]"
+              v-decorator="['jobName', { rules: [{ required: true, message: '请输入客户工作名称' }] }]"
               placeholder="请输入客户工作名称"
             />
           </a-form-item>
           <a-form-item label="工作强度" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
-            <a-radio-group v-decorator="['intensity']" defaultValue="1" buttonStyle="solid">
+            <a-radio-group
+              v-decorator="['jobStrength', { initialValue: this.jobStrengthDefaultVal }]"
+              buttonStyle="solid"
+            >
               <a-radio-button value="1">极轻</a-radio-button>
               <a-radio-button value="2">轻</a-radio-button>
               <a-radio-button value="3">中</a-radio-button>
@@ -166,6 +168,7 @@ export default {
   name: 'FormModal',
   data() {
     return {
+      jobStrengthDefaultVal: '1',
       bakUser: {},
       formLayout: 'horizontal',
       form: this.$form.createForm(this),
@@ -203,13 +206,14 @@ export default {
     })
   },
   methods: {
+    setJobStrength(e) {
+      this.jobStrengthDefaultVal = e.target.value // 改变默认值
+    },
     getCustomerByPhone() {
       this.userId = ''
       this.userInfo = { userId: '', userName: '', sex: '', city: '', cellphone: '' }
       originalCustomer(this.phone).then(res => {
         if (res.success) {
-          console.log('点击拿数据')
-
           let data = res.response
           this.userInfo.userId = data.oid
           this.userInfo.userName = data.userName
@@ -243,10 +247,16 @@ export default {
     },
     saveData() {
       this.form.validateFields((error, values) => {
-        values.intensity == undefined ? (this.bakUser.jobStrength = '1') : (this.bakUser.jobStrength = values.intensity)
-        this.bakUser.initHeight = values.height
-        this.bakUser.initWeight = values.weight
-        this.bakUser.jobName = values.job
+        console.log('原有的数据', this.bakUser)
+        console.log('新来的数据', values)
+
+        this.bakUser.jobStrength = values.jobStrength
+        this.bakUser.initHeight = values.initHeight
+        this.bakUser.initWeight = values.initWeight
+        this.bakUser.jobName = values.jobName
+
+        console.log('复制完了', this.bakUser)
+
         error ? console.log('新用户保存出错', error) : this.$emit('save', Object.assign(this.bakUser, values))
       })
     }

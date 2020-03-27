@@ -51,7 +51,7 @@ export const constantRouterMap = [
 
 export const asyncRouterMap = [
   {
-    path: '/ding/:id/:phone/:vip',
+    path: '/ding/:id/:phone/:vip/:h',
     component: () => import(/* webpackChunkName: "user" */ '@/views/H5/Ding'),
     meta: { title: '每日打卡', keepAlive: true }
   },

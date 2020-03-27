@@ -1,44 +1,82 @@
 <template>
   <div class="container">
     <div class="ding" v-if="isDing">
+      <div class="topbak">
+        <img class="logo" src="~@/assets/images/ding/logo.png" alt="" />
+      </div>
       <div class="card">
+        <div class="info">
+          <div class="text">
+            <div class="big">每日打卡</div>
+            <div class="tips">为确保测算准确，请输入您真实信息</div>
+          </div>
+          <div class="date_img">
+            <img class="logo" src="~@/assets/images/ding/date.png" alt="" />
+          </div>
+        </div>
         <div class="form">
           <Form @submit="onSubmit">
             <div class="weight">
-              <Field
-                v-model="form.weight"
-                type="number"
-                name="weight"
-                label="今日体重"
-                placeholder="请输入今日体重(kg)"
-                :rules="[{ required: true, message: '请输入今日体重' }]"
-              />
+              <Field type="number" v-model="form.weight" name="weight" label="今日体重">
+                <input
+                  v-number-only
+                  class="ipt"
+                  v-model="form.weight"
+                  type="text"
+                  slot="input"
+                  id="weight"
+                  placeholder="请输入体重(kg)"
+                  @focus="setWeight"
+                />
+              </Field>
             </div>
             <div class="height">
-              <Field
-                v-model="form.height"
-                name="height"
-                type="number"
-                label="身高"
-                placeholder="请输入身高(cm)"
-                :rules="[{ required: true, message: '请输入身高' }]"
-              />
+              <Field name="height" v-model="form.height" type="number" label="身高">
+                <input
+                  v-number-only
+                  class="ipt"
+                  v-model="form.height"
+                  type="text"
+                  slot="input"
+                  id="height"
+                  placeholder="请输入身高(cm)"
+                  @focus="setHeight"
+                />
+              </Field>
             </div>
             <div class="tolit">
               <Field name="isTolit" label="如厕后称重">
                 <template #input>
                   <RadioGroup v-model="form.isTolit" direction="horizontal">
-                    <Radio checked-color="#e96a70" name="1">否</Radio>
-                    <Radio checked-color="#e96a70" name="2">是</Radio>
+                    <Radio checked-color="#f7e580" name="1">否</Radio>
+                    <Radio checked-color="#f7e580" name="2">是</Radio>
                   </RadioGroup>
                 </template>
               </Field>
             </div>
             <div class="breakfast">
-              <Field v-model="form.breakfast" name="breakfast" label="早餐" placeholder="早餐内容" type="textarea" />
+              <Field v-model="form.breakfast" name="breakfast" label="早餐" type="textarea">
+                <textarea
+                  rows="1"
+                  v-model="form.breakfast"
+                  class="ipt_area"
+                  type="text"
+                  slot="input"
+                  placeholder="请输入早餐内容"
+                />
+              </Field>
             </div>
             <div class="lunch">
-              <Field v-model="form.lunch" name="lunch" label="午餐内容" placeholder="请输入午餐内容" type="textarea" />
+              <Field v-model="form.lunch" name="lunch" label="午餐内容" type="textarea">
+                <textarea
+                  v-model="form.lunch"
+                  rows="1"
+                  class="ipt_area"
+                  type="text"
+                  slot="input"
+                  placeholder="请输入午餐内容"
+                />
+              </Field>
             </div>
             <div class="lunchImg">
               <Field name="lunchImg" label="午餐照片">
@@ -48,57 +86,53 @@
               </Field>
             </div>
             <div class="dinner">
-              <Field
-                v-model="form.dinner"
-                name="dinner"
-                label="晚餐内容"
-                placeholder="请输入晚餐内容"
-                type="textarea"
-              />
+              <Field v-model="form.dinner" name="dinner" label="晚餐内容" placeholder="请输入晚餐内容" type="textarea">
+                <textarea
+                  rows="1"
+                  v-model="form.dinner"
+                  class="ipt_area"
+                  type="text"
+                  slot="input"
+                  placeholder="请输入晚餐内容"
+                />
+              </Field>
             </div>
             <div class="extra">
               <Field name="isExtra" label="是否加餐">
                 <template #input>
                   <RadioGroup v-model="form.isExtra" direction="horizontal">
-                    <Radio checked-color="#e96a70" name="1">否</Radio>
-                    <Radio checked-color="#e96a70" name="2">是</Radio>
+                    <Radio checked-color="#f7e580" name="1">否</Radio>
+                    <Radio checked-color="#f7e580" name="2">是</Radio>
                   </RadioGroup>
                 </template>
               </Field>
             </div>
             <div v-if="form.isExtra === '2'" class="extra-meal">
-              <Field
-                v-model="form.extalMeal"
-                name="extelMeal"
-                label="加餐内容"
-                placeholder="请输入加餐内容"
-                type="textarea"
-              />
-            </div>
-            <div class="sleep-time">
-              <Field
-                readonly
-                clickable
-                name="picker"
-                :value="form.sleepTime"
-                label="入睡时间"
-                placeholder="选择入睡时间"
-                @click="showPicker = true"
-              />
-              <Popup v-model="showPicker" position="bottom">
-                <Picker show-toolbar :columns="columns" @confirm="selectSleepTime" @cancel="showPicker = false" />
-              </Popup>
+              <Field v-model="form.extalMeal" name="extelMeal" label="加餐内容" type="textarea">
+                <textarea
+                  rows="1"
+                  v-model="form.extalMeal"
+                  class="ipt_area"
+                  type="text"
+                  slot="input"
+                  placeholder="请输入加餐内容"
+                />
+              </Field>
             </div>
             <div class="water">
-              <Field v-model="form.water" name="water" label="饮水量" type="number" placeholder="饮水量(L)" />
+              <Field v-model="form.water" name="water" label="饮水量" type="number">
+                <input v-model="form.water" class="ipt" type="number" slot="input" placeholder="饮水量(杯)" />
+              </Field>
             </div>
             <div class="cup">
-              <Field v-model="form.cup" name="cup" type="number" label="小红杯" placeholder="小红杯数量(杯)" />
+              <Field v-model="form.cup" name="cup" type="number" label="小红杯">
+                <input v-model="form.cup" class="ipt" type="number" slot="input" placeholder="小红杯数量(杯)" />
+              </Field>
             </div>
 
             <div style="margin: 16px;">
               <Button class="subBtn" round block type="info" native-type="submit">
-                提交
+                提交打卡
               </Button>
             </div>
           </Form>
@@ -140,7 +174,7 @@ import moment from 'moment'
 import Tabs from './component/tabs'
 import MyChange from './MyChange'
 import { dingToday, customerDing, dingImg, isVip, mecuryToday } from '@/api/manage'
-import { type } from 'mockjs2'
+import { setNumReg } from '@/utils/util'
 export default {
   name: 'Ding',
   components: {
@@ -160,13 +194,14 @@ export default {
     RadioGroup,
     Uploader
   },
-  mounted() {
+  created() {
+    this.form.height = this.$route.params.h // 默认身高
     this.isVip = this.$route.params.vip === 'true' ? true : false // 判断是否是vip
     this.oid = this.$route.params.id // 线上的
     this.userPhone = this.$route.params.phone //
-    this.mecuryToday() // 判断今日是否可以体质测试
-    this.dingToday() // 判断今日是否可以打卡
+    this.isVip ? this.loadData() : this.mecuryToday()
   },
+  mounted() {},
   data() {
     return {
       guid: {
@@ -199,7 +234,7 @@ export default {
       date: '',
       isMecury: false,
       isMyChange: false,
-      isDing: true,
+      isDing: false,
       show: false,
       columns: [
         '0:00~1:00',
@@ -240,23 +275,87 @@ export default {
         breakfast: '',
         lunchImg: [],
         extalMeal: '',
-        sleepTime: '',
         water: '',
         cup: ''
       },
       active: 0
     }
   },
+  directives: {
+    numberOnly: {
+      bind(el) {
+        el.handler = function() {
+          if (el.value == '0.00') {
+            el.value = ''
+          }
+          el.value = el.value.replace(/[^\d.]/g, '')
+          el.value = el.value.replace(/^\./g, '')
+          el.value = el.value.replace(/\.{2,}/g, '.')
+          el.value = el.value
+            .replace('.', '$#$')
+            .replace(/\./g, '')
+            .replace('$#$', '.')
+          el.value = el.value.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3')
+        }
+        el.addEventListener('input', el.handler)
+      },
+      unbind(el) {
+        el.removeEventListener('input', el.handler)
+      }
+    }
+  },
   methods: {
+    loadData() {
+      this.mecuryToday() // 判断今日是否可以体质测试
+      this.dingToday() // 判断今日是否可以打卡
+    },
     deleteImg(file) {
-      let constStr = file.url.split('/')
-      let resStr = constStr[constStr.length - 1].split('.')[0]
-      for (let i = 0; i < this.uploadImg.length; i++) {
-        if (this.uploadImg[i] === resStr) {
-          console.log('存在相同的', resStr)
-          this.uploadImg.splice(resStr, 1)
+      console.log('观察区别', file)
+      console.log('看看数组', this.form.lunchImg)
+
+      if (file.url) {
+        let constStr = file.url.split('/')
+        let resStr = constStr[constStr.length - 1].split('.')[0]
+        console.log('删除历史', resStr)
+
+        for (let i = 0; i < this.form.lunchImg.length; i++) {
+          console.log('FUCK', this.form.lunchImg[i])
+
+          if (this.form.lunchImg[i].url.indexOf(resStr) > -1) {
+            console.log(
+              '能找到吗？',
+              this.form.lunchImg.findIndex(item => {
+                this.form.lunchImg[i] == item
+              })
+            )
+
+            this.form.lunchImg.splice(
+              this.form.lunchImg.findIndex(item => {
+                this.form.lunchImg[i] == item
+              }),
+              1
+            )
+          }
+        }
+      } else {
+        console.log('WC', this.form.lunchImg)
+        for (let i = 0; i < this.form.lunchImg.length; i++) {
+          console.log('什么鬼', this.form.lunchImg[i])
+          if (this.form.lunchImg[i].file && this.form.lunchImg[i].file.lastModified === file.file.lastModified) {
+            console.log('对吗？')
+            this.form.lunchImg.splice(
+              this.form.lunchImg.findIndex(item => {
+                this.form.lunchImg[i] == item
+              }),
+              1
+            )
+          }
         }
       }
+
+      console.log('结果', this.form.lunchImg)
+      this.uploadImg = this.form.lunchImg
+
       return true
     },
     mecuryToday() {
@@ -267,6 +366,7 @@ export default {
           this.active = 2
           this.isMyChange = false
           this.isDing = false
+          this.isMecury = true
           this.tabStatus.ding = false
         } else if (res.success) {
         } else {
@@ -293,7 +393,7 @@ export default {
         }
 
         let list = res.response.dingList
-        if (res.success && list.length > 0) {
+        if (res.success && list && list.length > 0) {
           for (const key in this.guid) {
             for (let i = 0; i < list.length; i++) {
               if (list[i].questionGuid.toUpperCase() == this.guid[key]) {
@@ -339,14 +439,11 @@ export default {
         case 'extraFood':
           this.form.extalMeal = value === null ? '' : value
           break
-        case 'sleepTime':
-          this.form.sleepTime = value === null ? '' : value
-          break
         case 'water':
           this.form.water = value === null ? '' : value
           break
         case 'number':
-          this.form.number = value === null ? '' : value
+          this.form.cup = value === null ? '' : value
           break
       }
     },
@@ -410,16 +507,30 @@ export default {
           break
       }
     },
-    selectSleepTime(value) {
-      this.form.sleepTime = value
-      this.showPicker = false
+    setHeight() {
+      let dom = document.querySelector('#height')
+      dom.setAttribute('class', 'ipt')
+    },
+    setWeight() {
+      let dom = document.querySelector('#weight')
+      dom.setAttribute('class', 'ipt')
     },
     // 表单提交
     async onSubmit(values) {
-      // this.btnDisable = true
-      // setInterval(function() {
-      //   this.btnDisable = false
-      // }, 8000)
+      if (values.weight === '') {
+        console.log('bbbb')
+        let dom = document.querySelector('#weight')
+        dom.setAttribute('class', 'ipt weight')
+        return false
+      }
+      if (values.height === '') {
+        console.log('AAAA')
+
+        let dom = document.querySelector('#height')
+        dom.setAttribute('class', 'ipt height')
+        return false
+      }
+
       // 是否如厕称重
       values.isTolit === '1' ? (values.isTolit = '否') : (values.isTolit = '是')
       // 是否加餐
@@ -445,13 +556,6 @@ export default {
               })
             }, 1000)
           }
-          // else {
-          //   this.$notification['error']({
-          //     message: '错误',
-          //     description: res.message,
-          //     duration: 2
-          //   })
-          // }
         })
       }
 
@@ -481,9 +585,6 @@ export default {
             break
           case 'dinner':
             resArr.push({ questionOID: this.guid.dinner, answerContent: values[key] })
-            break
-          case 'picker':
-            resArr.push({ questionOID: this.guid.sleepTime, answerContent: values[key] })
             break
           case 'water':
             resArr.push({ questionOID: this.guid.water, answerContent: values[key] })
@@ -531,6 +632,16 @@ export default {
 }
 </script>
 <style scoped lang="less">
+.height::-webkit-input-placeholder {
+  /* WebKit browsers */
+  color: red !important;
+}
+
+.weight::-webkit-input-placeholder {
+  /* WebKit browsers */
+  color: red !important;
+}
+
 input::-webkit-input-placeholder {
   /* WebKit browsers */
   color: #c0c0c0 !important;
@@ -565,63 +676,127 @@ textarea:-ms-input-placeholder {
   color: #c0c0c0 !important;
 }
 
-.ding {
-  font-size: 20px;
-  color: white;
-  background: url(~@/assets/images/ding/ding_bg.jpg) no-repeat;
-  background-size: 100% 100%;
-  padding: 8.5rem 1.4rem 1.2rem;
-  .card {
-    background: url(~@/assets/images/ding/form_bg.png);
+.container {
+  .ding {
+    position: relative;
+    font-size: 20px;
+    color: white;
+    background: #f5f5f8;
     background-size: 100% 100%;
-    padding: 5rem 2.4rem 3rem;
-  }
-  .form {
-    .subBtn {
-      height: 2.4rem;
-      line-height: 2.2rem;
-      background-color: #e33b3e;
-      width: 10rem;
-      position: relative;
-      border: #e33b3e;
-      left: 2.8rem;
-      top: 1.25rem;
-      -moz-box-shadow: 2px 0 5px #e33b3e;
-      -webkit-box-shadow: 2px 0 5px #e33b3e;
-      box-shadow: 2px 0 5px #e33b3e;
+    .topbak {
+      height: 48vh;
+      background-color: #f7e580;
+      .logo {
+        width: 64vw;
+        margin: 2rem 3.5rem;
+      }
     }
-    .date {
-      .van-calendar {
-        background: white;
-        color: gray;
-        height: 94%;
-        .van-calendar__body {
-          .van-calendar__month {
-            .van-calendar__day {
-              height: 3.8rem;
-            }
+    .card {
+      background: white;
+      position: absolute;
+      top: 5.5rem;
+      left: 4%;
+      width: 92%;
+      padding: 0 5%;
+      box-shadow: 0px 4px 9px #bababa;
+      .info {
+        display: flex;
+        justify-content: space-between;
+        color: black;
+        padding: 1.5rem 4%;
+
+        .date_img {
+          height: 11.5vh;
+          width: 23%;
+          position: relative;
+          top: 3vh;
+          .logo {
+            width: 72%;
+            height: 62%;
+            position: relative;
+            left: 28%;
           }
         }
-        .van-calendar__footer {
-          clear: both;
-          padding-left: 9.3%;
-          y .van-button {
-            width: 70vw;
+        .text {
+          width: 75%;
+          .big {
+            font-size: 40px;
+            font-weight: bolder;
+          }
+          .tips {
+            font-size: 13px;
+            background-color: #f7e580;
           }
         }
       }
     }
-    .sleep-time {
-      .van-picker {
-        .van-picker__cancel {
-          position: relative;
-          top: 0;
-          left: 0;
+    .form {
+      padding-bottom: 4rem;
+      .ipt {
+        border: solid 1px #878787;
+        border-radius: 15px;
+        text-align: center;
+        width: 100%;
+      }
+      .ipt_area {
+        white-space: normal;
+        text-align: justify;
+        -moz-text-align-last: center; /* Firefox 12+ */
+        text-align-last: center;
+        resize: none;
+        border: solid 1px #878787;
+        border-radius: 25px;
+        width: 100%;
+        text-align: center;
+        padding: 0.6rem 0;
+      }
+
+      .subBtn {
+        color: black;
+        height: 2.4rem;
+        line-height: 2.2rem;
+        background-color: #f7e580;
+        position: relative;
+        border: #f7e580;
+        font-size: 1rem;
+        font-weight: bolder;
+        -moz-box-shadow: 2px 0 5px #f7e580;
+        -webkit-box-shadow: 2px 0 5px #f7e580;
+        box-shadow: 2px 0 5px #f7e580;
+      }
+      .date {
+        .van-calendar {
+          background: white;
+          color: gray;
+          height: 94%;
+          .van-calendar__body {
+            .van-calendar__month {
+              .van-calendar__day {
+                height: 3.8rem;
+              }
+            }
+          }
+          .van-calendar__footer {
+            clear: both;
+            padding-left: 9.3%;
+            y .van-button {
+              width: 70vw;
+            }
+          }
         }
-        .van-picker__confirm {
-          position: relative;
-          top: 0;
-          left: 0;
+      }
+      .sleep-time {
+        .van-picker {
+          .van-picker__cancel {
+            position: relative;
+            top: 0;
+            left: 0;
+          }
+          .van-picker__confirm {
+            position: relative;
+            top: 0;
+            left: 0;
+          }
         }
       }
     }

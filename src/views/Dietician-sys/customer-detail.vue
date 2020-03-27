@@ -163,7 +163,6 @@
                   <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">
                     <a-form @submit="handleSubmit" :form="form">
                       <a-form-item
-                        id="cccccc"
                         label="今日体重"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
@@ -187,11 +186,14 @@
                       </a-form-item>
                       <a-form-item
                         label="补卡日期"
-                        v-decorator="['AssistDate', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-date-picker @change="getDate" style="width:33.3vw" />
+                        <a-date-picker
+                          @change="getDate"
+                          style="width:33.3vw"
+                          v-decorator="['AssistDate', { rules: [{ required: true, message: '请选择补卡日期' }] }]"
+                        />
                       </a-form-item>
                       <a-form-item
                         label="是否排便后称重"
@@ -209,22 +211,14 @@
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-textarea
-                          rows="3"
-                          placeholder="请输入昨日早餐"
-                          v-decorator="['breakfast', { rules: [{ required: true, message: '请输入昨日早餐' }] }]"
-                        />
+                        <a-textarea rows="3" placeholder="请输入昨日早餐" v-decorator="['breakfast']" />
                       </a-form-item>
                       <a-form-item
                         label="昨日午餐"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-textarea
-                          rows="3"
-                          placeholder="请输入昨日午餐"
-                          v-decorator="['lunch', { rules: [{ required: true, message: '请输入昨日午餐' }] }]"
-                        />
+                        <a-textarea rows="3" placeholder="请输入昨日午餐" v-decorator="['lunch']" />
                       </a-form-item>
                       <a-form-item
                         label="午餐照片"
@@ -245,11 +239,7 @@
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-textarea
-                          rows="3"
-                          placeholder="请输入昨日晚餐"
-                          v-decorator="['dinner', { rules: [{ required: true, message: '请输入昨日晚餐' }] }]"
-                        />
+                        <a-textarea rows="3" placeholder="请输入昨日晚餐" v-decorator="['dinner']" />
                       </a-form-item>
 
                       <a-form-item
@@ -266,66 +256,22 @@
                           v-if="isExtraFood == 2"
                           rows="3"
                           placeholder="请输入加餐食物"
-                          v-decorator="['extraFood', { rules: [{ required: true, message: '请输入加餐食物' }] }]"
+                          v-decorator="['extraFood']"
                         />
-                      </a-form-item>
-                      <a-form-item
-                        label="入睡时间"
-                        :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
-                        :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
-                      >
-                        <a-select
-                          defaultValue="22:00~23:00"
-                          style="width:33.33vw"
-                          placeholder="请选择睡眠时间"
-                          v-decorator="['sleepTime', { rules: [{ required: true, message: '请选择睡眠时间' }] }]"
-                        >
-                          <a-select-option value="0:00~1:00">0:00~1:00</a-select-option>
-                          <a-select-option value="1:00~2:00">1:00~2:00</a-select-option>
-                          <a-select-option value="2:00~3:00">2:00~3:00</a-select-option>
-                          <a-select-option value="3:00~4:00">3:00~4:00</a-select-option>
-                          <a-select-option value="4:00~5:00">4:00~5:00</a-select-option>
-                          <a-select-option value="5:00~6:00">5:00~6:00</a-select-option>
-                          <a-select-option value="6:00~7:00">6:00~7:00</a-select-option>
-                          <a-select-option value="7:00~8:00">7:00~8:00</a-select-option>
-                          <a-select-option value="8:00~9:00">8:00~9:00</a-select-option>
-                          <a-select-option value="9:00~10:00">9:00~10:00</a-select-option>
-                          <a-select-option value="10:00~11:00">10:00~11:00</a-select-option>
-                          <a-select-option value="11:00~12:00">11:00~12:00</a-select-option>
-                          <a-select-option value="12:00~13:00">12:00~13:00</a-select-option>
-                          <a-select-option value="13:00~14:00">13:00~14:00</a-select-option>
-                          <a-select-option value="14:00~15:00">14:00~15:00</a-select-option>
-                          <a-select-option value="15:00~16:00">15:00~16:00</a-select-option>
-                          <a-select-option value="16:00~17:00">16:00~17:00</a-select-option>
-                          <a-select-option value="17:00~18:00">17:00~18:00</a-select-option>
-                          <a-select-option value="18:00~19:00">18:00~19:00</a-select-option>
-                          <a-select-option value="19:00~20:00">19:00~20:00</a-select-option>
-                          <a-select-option value="20:00~21:00">20:00~21:00</a-select-option>
-                          <a-select-option value="21:00~22:00">21:00~22:00</a-select-option>
-                          <a-select-option value="22:00~23:00">22:00~23:00</a-select-option>
-                        </a-select>
                       </a-form-item>
                       <a-form-item
                         label="饮水量"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-input
-                          v-decorator="['water', { rules: [{ required: true, message: '请输入饮水量' }] }]"
-                          name="water"
-                          placeholder="请输入饮水量(L)"
-                        />
+                        <a-input v-decorator="['water']" name="water" placeholder="请输入饮水量(杯)" />
                       </a-form-item>
                       <a-form-item
                         label="喝了多少小红杯"
                         :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
                         :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
                       >
-                        <a-input
-                          v-decorator="['number', { rules: [{ required: true, message: '请输入小红杯食用数量(杯)' }] }]"
-                          name="number"
-                          placeholder="请输入小红杯食用数量(杯)"
-                        />
+                        <a-input v-decorator="['number']" name="number" placeholder="请输入小红杯食用数量(杯)" />
                       </a-form-item>
 
                       <a-form-item :wrapperCol="{ span: 24 }" style="text-align: center">
@@ -510,10 +456,6 @@ export default {
         {
           title: '宵夜',
           dataIndex: 'nightSnack'
-        },
-        {
-          title: '睡眠时间',
-          dataIndex: 'sleepTime'
         },
         {
           title: '饮水量',
